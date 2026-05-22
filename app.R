@@ -85,12 +85,13 @@ ui <- bslib::page_fluid(
   h2("Ebola Outbreak Monitoring Dashboard"),
   p("Manually curated public counts from reviewed official and humanitarian reports."),
   bslib::layout_columns(
-    col_widths = c(2, 2, 2, 2, 2, 2),
+    col_widths = c(12, 6, 6, 6, 6, 6, 6),
     headline_card("Latest cutoff", "latest_cutoff"),
     headline_card("DRC suspected cases", "drc_suspected_cases"),
     headline_card("DRC confirmed cases", "drc_confirmed_cases"),
     headline_card("DRC deaths", "drc_deaths"),
-    headline_card("Uganda cases", "uganda_cases"),
+    headline_card("Uganda suspected cases", "uganda_suspected_cases"),
+    headline_card("Uganda confirmed cases", "uganda_confirmed_cases"),
     headline_card("Uganda deaths", "uganda_deaths")
   ),
   bslib::card(
@@ -98,10 +99,10 @@ ui <- bslib::page_fluid(
     bslib::card_body(
       div(
         class = "row filter-row",
-        div(class = "col-md-2", selectInput("source", "Source", select_choices(counts$source_name))),
-        div(class = "col-md-2", selectInput("country", "Country", select_choices(counts$country))),
-        div(class = "col-md-2", selectInput("classification", "Case classification", select_choices(counts$case_classification))),
-        div(class = "col-md-2", selectInput("metric", "Metric", select_choices(counts$metric))),
+        div(class = "col-md-2", selectInput("source", "Source", select_choices(counts$source_name), selectize = FALSE)),
+        div(class = "col-md-2", selectInput("country", "Country", select_choices(counts$country), selectize = FALSE)),
+        div(class = "col-md-2", selectInput("classification", "Case classification", select_choices(counts$case_classification), selectize = FALSE)),
+        div(class = "col-md-2", selectInput("metric", "Metric", select_choices(counts$metric), selectize = FALSE)),
         div(class = "col-md-4", dateRangeInput("date_range", "Date range", start = count_dates[[1]], end = count_dates[[2]], min = count_dates[[1]], max = count_dates[[2]]))
       )
     )
@@ -174,9 +175,9 @@ server <- function(input, output, session) {
     filtered_counts() %>%
       filter(
         count_type == "cumulative",
-        .data$country == country,
-        .data$case_classification %in% classification,
-        .data$metric == metric
+        .data$country == .env$country,
+        .data$case_classification %in% .env$classification,
+        .data$metric == .env$metric
       )
   }
 
@@ -190,8 +191,11 @@ server <- function(input, output, session) {
   output$drc_deaths <- renderText(format_latest_value(
     headline_subset("Democratic Republic of the Congo", "all", "deaths")
   ))
-  output$uganda_cases <- renderText(format_latest_value(
-    headline_subset("Uganda", c("suspected", "confirmed"), "cases")
+  output$uganda_suspected_cases <- renderText(format_latest_value(
+    headline_subset("Uganda", "suspected", "cases")
+  ))
+  output$uganda_confirmed_cases <- renderText(format_latest_value(
+    headline_subset("Uganda", "confirmed", "cases")
   ))
   output$uganda_deaths <- renderText(format_latest_value(
     headline_subset("Uganda", "all", "deaths")
@@ -293,8 +297,4 @@ server <- function(input, output, session) {
   })
 }
 
-app <- shinyApp(ui = ui, server = server)
-
-if (interactive()) {
-  runApp(app)
-}
+shinyApp(ui = ui, server = server)
