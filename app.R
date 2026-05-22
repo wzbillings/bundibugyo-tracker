@@ -61,7 +61,7 @@ format_latest_date <- function(data) {
 }
 
 format_link <- function(url) {
-  paste0("<a href=\"", htmltools::htmlEscape(url), "\" target=\"_blank\" rel=\"noopener noreferrer\">Open</a>")
+  paste0("<a href=\"", htmltools::htmlEscape(url, attribute = TRUE), "\" target=\"_blank\" rel=\"noopener noreferrer\">Open</a>")
 }
 
 latest_summary_rows <- function(data) {
@@ -205,16 +205,23 @@ server <- function(input, output, session) {
       return(bslib::card(bslib::card_body("No data match the current filters.")))
     }
 
-    bslib::layout_columns(
-      col_widths = c(12, rep(4, min(nrow(summary_rows), 6))),
-      headline_card("Latest cutoff", "latest_cutoff"),
-      lapply(seq_len(min(nrow(summary_rows), 6)), function(index) {
-        headline_summary_card(
-          summary_rows$label[[index]],
-          summary_rows$value[[index]],
-          summary_rows$cutoff[[index]]
-        )
-      })
+    summary_cards <- lapply(seq_len(min(nrow(summary_rows), 6)), function(index) {
+      headline_summary_card(
+        summary_rows$label[[index]],
+        summary_rows$value[[index]],
+        summary_rows$cutoff[[index]]
+      )
+    })
+
+    do.call(
+      bslib::layout_columns,
+      c(
+        list(
+          col_widths = c(12, rep(4, length(summary_cards))),
+          headline_card("Latest cutoff", "latest_cutoff")
+        ),
+        summary_cards
+      )
     )
   })
 
@@ -299,7 +306,7 @@ server <- function(input, output, session) {
 
     datatable(
       table_data,
-      escape = FALSE,
+      escape = setdiff(names(table_data), "link"),
       rownames = FALSE,
       options = list(pageLength = 10, scrollX = TRUE)
     )
@@ -313,7 +320,7 @@ server <- function(input, output, session) {
 
     datatable(
       table_data,
-      escape = FALSE,
+      escape = setdiff(names(table_data), "link"),
       rownames = FALSE,
       options = list(pageLength = 10, scrollX = TRUE)
     )
