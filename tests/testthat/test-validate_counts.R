@@ -26,6 +26,37 @@ valid_counts_fixture <- function() {
   )
 }
 
+valid_source_log_fixture <- function(url = "https://www.who.int/example-report") {
+  data.frame(
+    source_id = "src-1",
+    source_name = "WHO",
+    title = "Report",
+    url = url,
+    publication_date = "2026-02-02",
+    retrieved_at = "2026-05-22T12:00:00Z",
+    source_type = "disease_outbreak_news",
+    country = "DRC",
+    keywords = "Ebola",
+    review_status = "reviewed",
+    notes = "sample",
+    stringsAsFactors = FALSE
+  )
+}
+
+valid_news_fixture <- function(url = "https://www.who.int/news-highlight") {
+  data.frame(
+    date = "2026-02-02",
+    source = "WHO",
+    title = "Report",
+    url = url,
+    summary = "Summary",
+    category = "epidemiology",
+    is_official = "TRUE",
+    notes = "sample",
+    stringsAsFactors = FALSE
+  )
+}
+
 test_that("validate_counts_data returns no errors for valid data", {
   result <- validate_counts_data(valid_counts_fixture())
 
@@ -87,33 +118,78 @@ test_that("validate_counts_data flags invalid categories and date ordering", {
 
 test_that("validate_all_data flags count urls missing from source log", {
   counts <- valid_counts_fixture()
-  source_log <- data.frame(
-    source_id = "src-1",
-    source_name = "WHO",
-    title = "Report",
-    url = "https://www.who.int/different-report",
-    publication_date = "2026-02-02",
-    retrieved_at = "2026-05-22T12:00:00Z",
-    source_type = "disease_outbreak_news",
-    country = "DRC",
-    keywords = "Ebola",
-    review_status = "reviewed",
-    notes = "sample",
-    stringsAsFactors = FALSE
-  )
-  news <- data.frame(
-    date = "2026-02-02",
-    source = "WHO",
-    title = "Report",
-    url = "https://www.who.int/news-highlight",
-    summary = "Summary",
-    category = "epidemiology",
-    is_official = "TRUE",
-    notes = "sample",
-    stringsAsFactors = FALSE
-  )
+  source_log <- valid_source_log_fixture("https://www.who.int/different-report")
+  news <- valid_news_fixture()
 
   result <- validate_all_data(counts, source_log, news)
 
   expect_true(any(grepl("count source_url values missing from source_log", result$errors)))
+})
+
+test_that("validate_all_data accepts matching count urls from source log", {
+  result <- validate_all_data(
+    valid_counts_fixture(),
+    valid_source_log_fixture(),
+    valid_news_fixture()
+  )
+
+  expect_false(any(grepl("count source_url values missing from source_log", result$errors)))
+})
+
+test_that("validate_all_data matches count urls with surrounding whitespace", {
+  counts <- valid_counts_fixture()
+  counts$source_url <- paste0("  ", counts$source_url, "  ")
+
+  result <- validate_all_data(
+    counts,
+    valid_source_log_fixture(),
+    valid_news_fixture()
+  )
+
+  expect_false(any(grepl("count source_url values missing from source_log", result$errors)))
+})
+
+test_that("validate_all_data ignores blank count urls in source log membership", {
+  counts <- valid_counts_fixture()
+  counts$source_url[1] <- ""
+
+  result <- validate_all_data(
+    counts,
+    valid_source_log_fixture(),
+    valid_news_fixture()
+  )
+
+  expect_true(any(grepl("Missing source_url", result$errors)))
+  expect_false(any(grepl("count source_url values missing from source_log", result$errors)))
+})
+
+test_that("validate_counts_data rejects malformed http-looking urls", {
+  input <- valid_counts_fixture()
+  input$source_url[1] <- "https://?"
+
+  result <- validate_counts_data(input)
+
+  expect_true(any(grepl("Invalid source_url", result$errors)))
+})
+
+test_that("validate_counts_data flags example.org sample urls case-insensitively", {
+  input <- valid_counts_fixture()
+  input$source_url[1] <- "HTTPS://WWW.EXAMPLE.ORG/report"
+
+  result <- validate_counts_data(input)
+
+  expect_true(any(grepl("Sample source_url", result$errors)))
+})
+
+test_that("source log and news highlight validators flag invalid fields", {
+  source_log <- valid_source_log_fixture()
+  source_log$review_status <- "pending"
+  news <- valid_news_fixture()
+  news$category <- "fundraising"
+
+  source_result <- validate_source_log_data(source_log)
+  news_result <- validate_news_highlights_data(news)
+
+  expect_true(any(grepl("Invalid source_log review_status", source_result$errors)))
+  expect_true(any(grepl("Invalid news_highlights category", news_result$errors)))
 })

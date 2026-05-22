@@ -41,7 +41,11 @@ parse_count_values <- function(counts) {
 }
 
 is_http_url <- function(values) {
-  grepl("^https?://[^[:space:]]+$", values)
+  grepl(
+    "^https?://([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,}(:[0-9]+)?([/?#][^[:space:]]*)?$",
+    values,
+    ignore.case = TRUE
+  )
 }
 
 validate_url_values <- function(values, label) {
@@ -54,7 +58,7 @@ validate_url_values <- function(values, label) {
   if (any(!is.na(trimmed) & trimmed != "" & !is_http_url(trimmed))) {
     errors <- add_message(errors, paste("Invalid", label, "values"))
   }
-  if (any(grepl("^https?://example\\.org", trimmed))) {
+  if (any(grepl("^https?://(www\\.)?example\\.org([/:?#]|$)", trimmed, ignore.case = TRUE))) {
     errors <- add_message(errors, paste("Sample", label, "values"))
   }
 
@@ -283,7 +287,11 @@ validate_all_data <- function(counts, source_log, news_highlights) {
   ))
 
   if (all(c("source_url") %in% names(counts)) && "url" %in% names(source_log)) {
-    missing_count_urls <- setdiff(unique(counts$source_url), unique(source_log$url))
+    count_urls <- trimws(as.character(counts$source_url))
+    source_urls <- trimws(as.character(source_log$url))
+    count_urls <- unique(count_urls[!is.na(count_urls) & count_urls != ""])
+    source_urls <- unique(source_urls[!is.na(source_urls) & source_urls != ""])
+    missing_count_urls <- setdiff(count_urls, source_urls)
     if (length(missing_count_urls) > 0) {
       result$errors <- add_message(result$errors, "count source_url values missing from source_log")
     }
