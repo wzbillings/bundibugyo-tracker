@@ -1,4 +1,12 @@
-library(dplyr)
+load_package <- function(package) {
+  suppressPackageStartupMessages(
+    suppressWarnings(
+      library(package, character.only = TRUE)
+    )
+  )
+}
+
+load_package("dplyr")
 
 make_epicurve_data <- function(counts) {
   counts %>%

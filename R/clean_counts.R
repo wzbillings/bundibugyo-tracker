@@ -1,7 +1,15 @@
-library(dplyr)
-library(lubridate)
-library(readr)
-library(stringr)
+load_package <- function(package) {
+  suppressPackageStartupMessages(
+    suppressWarnings(
+      library(package, character.only = TRUE)
+    )
+  )
+}
+
+load_package("dplyr")
+load_package("lubridate")
+load_package("readr")
+load_package("stringr")
 
 required_count_columns <- c(
   "source_name",
