@@ -60,12 +60,46 @@ format_latest_date <- function(data) {
   format(max(data$data_cutoff_date, na.rm = TRUE), "%Y-%m-%d")
 }
 
+format_link <- function(url) {
+  paste0("<a href=\"", htmltools::htmlEscape(url), "\" target=\"_blank\" rel=\"noopener noreferrer\">Open</a>")
+}
+
+latest_summary_rows <- function(data) {
+  if (nrow(data) == 0) {
+    return(data.frame(label = character(), value = character(), cutoff = character()))
+  }
+
+  data %>%
+    filter(count_type == "cumulative") %>%
+    group_by(country, case_classification, metric) %>%
+    arrange(desc(data_cutoff_date), desc(publication_date), .by_group = TRUE) %>%
+    slice_head(n = 1) %>%
+    ungroup() %>%
+    mutate(
+      label = paste(country, case_classification, metric, sep = " - "),
+      value = format(count, big.mark = ","),
+      cutoff = format(data_cutoff_date, "%Y-%m-%d")
+    ) %>%
+    arrange(country, metric, case_classification)
+}
+
 headline_card <- function(title, output_id) {
   bslib::card(
     class = "dashboard-card",
     bslib::card_body(
       tags$div(class = "card-title", title),
       tags$div(class = "card-value", textOutput(output_id, inline = TRUE))
+    )
+  )
+}
+
+headline_summary_card <- function(label, value, cutoff) {
+  bslib::card(
+    class = "dashboard-card",
+    bslib::card_body(
+      tags$div(class = "card-title", label),
+      tags$div(class = "card-value", value),
+      tags$div(class = "card-caption", paste("Cutoff", cutoff))
     )
   )
 }
@@ -84,16 +118,7 @@ ui <- bslib::page_fluid(
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")),
   h2("Ebola Outbreak Monitoring Dashboard"),
   p("Manually curated public counts from reviewed official and humanitarian reports."),
-  bslib::layout_columns(
-    col_widths = c(12, 6, 6, 6, 6, 6, 6),
-    headline_card("Latest cutoff", "latest_cutoff"),
-    headline_card("DRC suspected cases", "drc_suspected_cases"),
-    headline_card("DRC confirmed cases", "drc_confirmed_cases"),
-    headline_card("DRC deaths", "drc_deaths"),
-    headline_card("Uganda suspected cases", "uganda_suspected_cases"),
-    headline_card("Uganda confirmed cases", "uganda_confirmed_cases"),
-    headline_card("Uganda deaths", "uganda_deaths")
-  ),
+  uiOutput("headline_cards"),
   bslib::card(
     bslib::card_header("Filters"),
     bslib::card_body(
@@ -171,35 +196,27 @@ server <- function(input, output, session) {
       )
   })
 
-  headline_subset <- function(country, classification, metric) {
-    filtered_counts() %>%
-      filter(
-        count_type == "cumulative",
-        .data$country == .env$country,
-        .data$case_classification %in% .env$classification,
-        .data$metric == .env$metric
-      )
-  }
-
   output$latest_cutoff <- renderText(format_latest_date(filtered_counts()))
-  output$drc_suspected_cases <- renderText(format_latest_value(
-    headline_subset("Democratic Republic of the Congo", "suspected", "cases")
-  ))
-  output$drc_confirmed_cases <- renderText(format_latest_value(
-    headline_subset("Democratic Republic of the Congo", "confirmed", "cases")
-  ))
-  output$drc_deaths <- renderText(format_latest_value(
-    headline_subset("Democratic Republic of the Congo", "all", "deaths")
-  ))
-  output$uganda_suspected_cases <- renderText(format_latest_value(
-    headline_subset("Uganda", "suspected", "cases")
-  ))
-  output$uganda_confirmed_cases <- renderText(format_latest_value(
-    headline_subset("Uganda", "confirmed", "cases")
-  ))
-  output$uganda_deaths <- renderText(format_latest_value(
-    headline_subset("Uganda", "all", "deaths")
-  ))
+
+  output$headline_cards <- renderUI({
+    summary_rows <- latest_summary_rows(filtered_counts())
+
+    if (nrow(summary_rows) == 0) {
+      return(bslib::card(bslib::card_body("No data match the current filters.")))
+    }
+
+    bslib::layout_columns(
+      col_widths = c(12, rep(4, min(nrow(summary_rows), 6))),
+      headline_card("Latest cutoff", "latest_cutoff"),
+      lapply(seq_len(min(nrow(summary_rows), 6)), function(index) {
+        headline_summary_card(
+          summary_rows$label[[index]],
+          summary_rows$value[[index]],
+          summary_rows$cutoff[[index]]
+        )
+      })
+    )
+  })
 
   output$cumulative_plot <- renderPlotly({
     plot_data <- filtered_counts() %>%
@@ -276,23 +293,29 @@ server <- function(input, output, session) {
 
   output$source_log_table <- renderDT({
     table_data <- source_log %>%
-      select(source_name, title, publication_date, url, review_status, notes)
+      arrange(desc(publication_date), source_name) %>%
+      mutate(link = format_link(url)) %>%
+      select(source_name, title, publication_date, link, review_status, notes)
 
     datatable(
       table_data,
+      escape = FALSE,
       rownames = FALSE,
-      options = list(pageLength = 5, scrollX = TRUE)
+      options = list(pageLength = 10, scrollX = TRUE)
     )
   })
 
   output$news_highlights_table <- renderDT({
     table_data <- news_highlights %>%
-      select(date, source, title, url, summary, category, is_official)
+      arrange(desc(date), source) %>%
+      mutate(link = format_link(url)) %>%
+      select(date, source, title, link, summary, category, is_official)
 
     datatable(
       table_data,
+      escape = FALSE,
       rownames = FALSE,
-      options = list(pageLength = 5, scrollX = TRUE)
+      options = list(pageLength = 10, scrollX = TRUE)
     )
   })
 }
