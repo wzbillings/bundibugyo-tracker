@@ -64,6 +64,13 @@ format_link <- function(url) {
   paste0("<a href=\"", htmltools::htmlEscape(url, attribute = TRUE), "\" target=\"_blank\" rel=\"noopener noreferrer\">Open</a>")
 }
 
+escape_table_display_fields <- function(data, exclude = character()) {
+  fields <- setdiff(names(data), exclude)
+
+  data %>%
+    mutate(across(all_of(fields), ~ as.character(htmltools::htmlEscape(.x, attribute = FALSE))))
+}
+
 latest_summary_rows <- function(data) {
   if (nrow(data) == 0) {
     return(data.frame(label = character(), value = character(), cutoff = character()))
@@ -302,11 +309,12 @@ server <- function(input, output, session) {
     table_data <- source_log %>%
       arrange(desc(publication_date), source_name) %>%
       mutate(link = format_link(url)) %>%
-      select(source_name, title, publication_date, link, review_status, notes)
+      select(source_name, title, publication_date, link, review_status, notes) %>%
+      escape_table_display_fields(exclude = "link")
 
     datatable(
       table_data,
-      escape = setdiff(names(table_data), "link"),
+      escape = FALSE,
       rownames = FALSE,
       options = list(pageLength = 10, scrollX = TRUE)
     )
@@ -316,11 +324,12 @@ server <- function(input, output, session) {
     table_data <- news_highlights %>%
       arrange(desc(date), source) %>%
       mutate(link = format_link(url)) %>%
-      select(date, source, title, link, summary, category, is_official)
+      select(date, source, title, link, summary, category, is_official) %>%
+      escape_table_display_fields(exclude = "link")
 
     datatable(
       table_data,
-      escape = setdiff(names(table_data), "link"),
+      escape = FALSE,
       rownames = FALSE,
       options = list(pageLength = 10, scrollX = TRUE)
     )
