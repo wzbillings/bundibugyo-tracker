@@ -91,7 +91,13 @@ sample-cdc-1,CDC sample,Sample CDC situation summary,https://example.org/cdc-sam
 ```r
 library(testthat)
 
-test_dir("tests/testthat", reporter = "summary")
+test_files <- list.files("tests/testthat", pattern = "^test.*\\.R$", full.names = TRUE)
+
+if (length(test_files) > 0) {
+  test_dir("tests/testthat", reporter = "summary")
+} else {
+  message("No test files found yet.")
+}
 ```
 
 - [ ] **Step 6: Commit scaffold**
