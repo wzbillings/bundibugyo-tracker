@@ -1,0 +1,4 @@
+date,source,title,url,summary,category,is_official,notes
+2026-02-02,WHO AFRO,Sample official situation update,https://example.org/who-afro-sample-1,Official sample update used to test display of reviewed highlights.,epidemiology,TRUE,Sample row for dashboard development only
+2026-02-08,ReliefWeb,Sample humanitarian operations update,https://example.org/reliefweb-sample-1,Humanitarian sample update used to test reviewed context display.,response,TRUE,Sample row for dashboard development only
+2026-02-09,Reuters,Sample contextual news item,https://example.org/reuters-sample-1,News sample used to test non-official context display.,policy,FALSE,Sample row for dashboard development only

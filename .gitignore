@@ -1,0 +1,7 @@
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.superpowers/
+raw_reports/*.tmp
+raw_reports/*.partial

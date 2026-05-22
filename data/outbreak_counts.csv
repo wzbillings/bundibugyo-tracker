@@ -1,0 +1,13 @@
+source_name,source_url,publication_date,data_cutoff_date,country,case_classification,metric,count_type,count,notes
+WHO AFRO sample,https://example.org/who-afro-sample-1,2026-02-02,2026-02-01,Democratic Republic of the Congo,suspected,cases,cumulative,8,Sample row for dashboard development only
+WHO AFRO sample,https://example.org/who-afro-sample-1,2026-02-02,2026-02-01,Democratic Republic of the Congo,confirmed,cases,cumulative,2,Sample row for dashboard development only
+WHO AFRO sample,https://example.org/who-afro-sample-1,2026-02-02,2026-02-01,Democratic Republic of the Congo,all,deaths,cumulative,1,Sample row for dashboard development only
+WHO AFRO sample,https://example.org/who-afro-sample-2,2026-02-05,2026-02-04,Democratic Republic of the Congo,suspected,cases,cumulative,14,Sample row for dashboard development only
+WHO AFRO sample,https://example.org/who-afro-sample-2,2026-02-05,2026-02-04,Democratic Republic of the Congo,confirmed,cases,cumulative,5,Sample row for dashboard development only
+WHO AFRO sample,https://example.org/who-afro-sample-2,2026-02-05,2026-02-04,Democratic Republic of the Congo,all,deaths,cumulative,2,Sample row for dashboard development only
+ReliefWeb sample,https://example.org/reliefweb-sample-1,2026-02-08,2026-02-07,Democratic Republic of the Congo,suspected,cases,cumulative,18,Sample row for dashboard development only
+ReliefWeb sample,https://example.org/reliefweb-sample-1,2026-02-08,2026-02-07,Democratic Republic of the Congo,confirmed,cases,cumulative,7,Sample row for dashboard development only
+ReliefWeb sample,https://example.org/reliefweb-sample-1,2026-02-08,2026-02-07,Democratic Republic of the Congo,all,deaths,cumulative,3,Sample row for dashboard development only
+WHO AFRO sample,https://example.org/who-afro-sample-3,2026-02-10,2026-02-09,Uganda,suspected,cases,cumulative,1,Sample imported-case placeholder for dashboard development only
+WHO AFRO sample,https://example.org/who-afro-sample-3,2026-02-10,2026-02-09,Uganda,confirmed,cases,cumulative,0,Sample imported-case placeholder for dashboard development only
+WHO AFRO sample,https://example.org/who-afro-sample-3,2026-02-10,2026-02-09,Uganda,all,deaths,cumulative,0,Sample imported-case placeholder for dashboard development only

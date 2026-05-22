@@ -1,0 +1,4 @@
+source_id,source_name,title,url,publication_date,retrieved_at,source_type,country,keywords,review_status,notes
+sample-who-afro-1,WHO AFRO sample,Sample official situation update,https://example.org/who-afro-sample-1,2026-02-02,2026-05-22T12:00:00Z,situation_report,Democratic Republic of the Congo,"Ebola; Bundibugyo; DRC",extracted,Sample row for dashboard development only
+sample-reliefweb-1,ReliefWeb sample,Sample humanitarian operations update,https://example.org/reliefweb-sample-1,2026-02-08,2026-05-22T12:00:00Z,situation_report,Democratic Republic of the Congo,"Ebola; response; situation report",reviewed,Sample row for dashboard development only
+sample-cdc-1,CDC sample,Sample CDC situation summary,https://example.org/cdc-sample-1,2026-02-09,2026-05-22T12:00:00Z,advisory,Uganda,"Ebola; travel; clinical guidance",reviewed,Sample row for dashboard development only
