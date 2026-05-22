@@ -196,6 +196,9 @@ After the manual workflow is trusted, later milestones may add:
 
 - ReliefWeb API source discovery.
 - WHO, WHO AFRO, CDC, ECDC, Africa CDC, and Ministry source metadata checks.
+- A curated, queryable news-article database maintained alongside reviewed website headlines.
+- A news discovery tab that shows automatically detected new updates before human review.
+- A reviewed highlights tab that shows the most recent human-selected articles from the curated news database.
 - GitHub Actions for validation.
 - GitHub Actions for source-log discovery only.
 - shinyapps.io deployment.
