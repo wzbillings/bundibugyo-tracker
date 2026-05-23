@@ -341,7 +341,11 @@ test_that("validate_source_candidates_data requires reviewed_at for reviewed can
 
   result <- validate_source_candidates_data(candidate)
 
-  expect_true(any(grepl("reviewed candidates require reviewed_at", result$errors)))
+  expect_true(any(grepl(
+    "Reviewed, rejected, and deferred candidates require reviewed_at",
+    result$errors,
+    fixed = TRUE
+  )))
 })
 
 test_that("validate_source_candidates_data requires blank promoted_source_id unless promoted", {

@@ -222,7 +222,7 @@ ui <- bslib::page_fluid(
       bslib::card_body(
         tags$p(
           class = "increment-caveat",
-          "Read-only review metadata only. Candidate rows do not update outbreak counts until a human promotes them."
+          "Read-only review metadata. Candidate rows do not update outbreak counts until a human promotes them."
         ),
         DTOutput("candidate_queue_table")
       )

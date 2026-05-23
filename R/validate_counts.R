@@ -396,7 +396,10 @@ validate_source_candidates_data <- function(data) {
 
   reviewed_rows <- review_status %in% c("reviewed", "rejected", "deferred")
   if (any(reviewed_rows & missing_reviewed_at)) {
-    errors <- add_message(errors, "reviewed candidates require reviewed_at")
+    errors <- add_message(
+      errors,
+      "Reviewed, rejected, and deferred candidates require reviewed_at"
+    )
   }
 
   promoted_rows <- review_status == "promoted"

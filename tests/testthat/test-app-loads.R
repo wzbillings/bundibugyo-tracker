@@ -29,7 +29,24 @@ test_that("app.R loads source candidates for the dashboard", {
   source("app.R", local = env)
 
   expect_true(exists("source_candidates", envir = env))
-  expect_gt(nrow(env$source_candidates), 0)
+  expect_true(all(
+    c(
+      "candidate_id",
+      "discovered_at",
+      "source_name",
+      "title",
+      "url",
+      "publication_date",
+      "source_type",
+      "country",
+      "keywords",
+      "discovery_method",
+      "review_status",
+      "review_notes",
+      "reviewed_at",
+      "promoted_source_id"
+    ) %in% names(env$source_candidates)
+  ))
 })
 
 test_that("format_link escapes href attribute quotes", {
@@ -97,6 +114,35 @@ test_that("candidate queue table data escapes raw text and preserves links", {
   expect_identical(table_data$title, "&lt;b&gt;candidate title&lt;/b&gt;")
   expect_identical(table_data$review_notes, "&lt;script&gt;alert(1)&lt;/script&gt;")
   expect_match(table_data$link, "<a href=", fixed = TRUE)
+})
+
+test_that("candidate queue table data handles an empty queue", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  empty_candidates <- env$source_candidates[0, ]
+  table_data <- env$candidate_queue_table_data(empty_candidates)
+
+  expect_equal(nrow(table_data), 0)
+  expect_true(all(
+    c(
+      "discovered_at",
+      "source_name",
+      "title",
+      "link",
+      "publication_date",
+      "source_type",
+      "country",
+      "discovery_method",
+      "review_status",
+      "review_notes",
+      "promoted_source_id"
+    ) %in% names(table_data)
+  ))
 })
 
 test_that("latest_summary_rows includes classified death rows", {
@@ -171,4 +217,9 @@ test_that("candidate queue table output is defined for read-only review", {
 
   expect_true(any(grepl("candidate_queue_table", capture.output(str(env$ui)), fixed = TRUE)))
   expect_true(exists("candidate_queue_table_data", envir = env))
+  expect_true(any(grepl(
+    "Read-only review metadata. Candidate rows do not update outbreak counts until a human promotes them.",
+    capture.output(str(env$ui)),
+    fixed = TRUE
+  )))
 })
