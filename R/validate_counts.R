@@ -65,6 +65,11 @@ validate_url_values <- function(values, label) {
   errors
 }
 
+is_missing_value <- function(values) {
+  trimmed <- trimws(as.character(values))
+  is.na(values) | is.na(trimmed) | trimmed == ""
+}
+
 validate_counts_data <- function(data) {
   errors <- character()
   warnings <- character()
@@ -98,9 +103,17 @@ validate_counts_data <- function(data) {
     publication_dates <- suppressWarnings(lubridate::ymd(data$publication_date))
     cutoff_dates <- suppressWarnings(lubridate::ymd(data$data_cutoff_date))
 
-    invalid_publication_dates <- is.na(publication_dates) & !is.na(data$publication_date)
-    invalid_cutoff_dates <- is.na(cutoff_dates) & !is.na(data$data_cutoff_date)
+    missing_publication_dates <- is_missing_value(data$publication_date)
+    missing_cutoff_dates <- is_missing_value(data$data_cutoff_date)
+    invalid_publication_dates <- is.na(publication_dates) & !missing_publication_dates
+    invalid_cutoff_dates <- is.na(cutoff_dates) & !missing_cutoff_dates
 
+    if (any(missing_publication_dates)) {
+      errors <- add_message(errors, "Missing publication_date values")
+    }
+    if (any(missing_cutoff_dates)) {
+      errors <- add_message(errors, "Missing data_cutoff_date values")
+    }
     if (any(invalid_publication_dates)) {
       errors <- add_message(errors, "Invalid publication_date values")
     }
@@ -214,11 +227,19 @@ validate_source_log_data <- function(data) {
 
   publication_dates <- suppressWarnings(lubridate::ymd(data$publication_date))
   retrieved_at <- suppressWarnings(lubridate::ymd_hms(data$retrieved_at))
+  missing_publication_dates <- is_missing_value(data$publication_date)
+  missing_retrieved_at <- is_missing_value(data$retrieved_at)
 
-  if (any(is.na(publication_dates) & !is.na(data$publication_date))) {
+  if (any(missing_publication_dates)) {
+    errors <- add_message(errors, "Missing source_log publication_date values")
+  }
+  if (any(missing_retrieved_at)) {
+    errors <- add_message(errors, "Missing source_log retrieved_at values")
+  }
+  if (any(is.na(publication_dates) & !missing_publication_dates)) {
     errors <- add_message(errors, "Invalid source_log publication_date values")
   }
-  if (any(is.na(retrieved_at) & !is.na(data$retrieved_at))) {
+  if (any(is.na(retrieved_at) & !missing_retrieved_at)) {
     errors <- add_message(errors, "Invalid source_log retrieved_at values")
   }
 
@@ -255,7 +276,11 @@ validate_news_highlights_data <- function(data) {
   errors <- c(errors, validate_url_values(data$url, "news_highlights url"))
 
   dates <- suppressWarnings(lubridate::ymd(data$date))
-  if (any(is.na(dates) & !is.na(data$date))) {
+  missing_dates <- is_missing_value(data$date)
+  if (any(missing_dates)) {
+    errors <- add_message(errors, "Missing news_highlights date values")
+  }
+  if (any(is.na(dates) & !missing_dates)) {
     errors <- add_message(errors, "Invalid news_highlights date values")
   }
 

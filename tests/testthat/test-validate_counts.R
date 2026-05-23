@@ -116,6 +116,17 @@ test_that("validate_counts_data flags invalid categories and date ordering", {
   expect_true(any(grepl("Invalid metric", result$errors)))
 })
 
+test_that("validate_counts_data flags missing required dates", {
+  input <- valid_counts_fixture()
+  input$publication_date[1] <- NA
+  input$data_cutoff_date[2] <- ""
+
+  result <- validate_counts_data(input)
+
+  expect_true(any(grepl("Missing publication_date", result$errors)))
+  expect_true(any(grepl("Missing data_cutoff_date", result$errors)))
+})
+
 test_that("validate_all_data flags count urls missing from source log", {
   counts <- valid_counts_fixture()
   source_log <- valid_source_log_fixture("https://www.who.int/different-report")
@@ -192,4 +203,19 @@ test_that("source log and news highlight validators flag invalid fields", {
 
   expect_true(any(grepl("Invalid source_log review_status", source_result$errors)))
   expect_true(any(grepl("Invalid news_highlights category", news_result$errors)))
+})
+
+test_that("source log and news highlight validators flag missing required dates", {
+  source_log <- valid_source_log_fixture()
+  source_log$publication_date <- ""
+  source_log$retrieved_at <- NA
+  news <- valid_news_fixture()
+  news$date <- ""
+
+  source_result <- validate_source_log_data(source_log)
+  news_result <- validate_news_highlights_data(news)
+
+  expect_true(any(grepl("Missing source_log publication_date", source_result$errors)))
+  expect_true(any(grepl("Missing source_log retrieved_at", source_result$errors)))
+  expect_true(any(grepl("Missing news_highlights date", news_result$errors)))
 })
