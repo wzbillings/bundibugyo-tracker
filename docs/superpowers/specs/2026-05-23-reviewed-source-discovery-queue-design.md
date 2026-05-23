@@ -18,6 +18,7 @@ Add a lightweight reviewed source-discovery queue that records candidate officia
 
 - No automatic case-count extraction.
 - No automatic writes to `data/outbreak_counts.csv`.
+- No app-based editing of candidate rows by dashboard visitors.
 - No inferred zero rows for missing report days.
 - No automatic promotion from candidate queue to reviewed `data/source_log.csv`.
 - No database migration, deployment, scheduler, or background job.
@@ -33,6 +34,7 @@ The milestone 4 human-in-the-loop checklist still lists pre-implementation decis
 - Promotion remains manual: a human copies reviewed metadata into `data/source_log.csv`.
 - Milestone 4 defines the queue and review workflow first and does not call live public APIs.
 - The in-app label should emphasize that candidate sources are unreviewed and do not drive epidemiologic counts.
+- Candidate queue updates happen through repository-controlled CSV edits only, not through the Shiny UI.
 
 ## Architecture
 
@@ -41,6 +43,8 @@ Milestone 4 extends the current CSV-first workflow rather than introducing a new
 Validation continues to flow through `R/validate_counts.R`, which already serves as the repo's central curation gate. Candidate validation should be added as a focused companion validator within the same script so the existing `Rscript R/validate_counts.R` command continues to cover the full manual workflow.
 
 The app remains a single-file Shiny dashboard for now. Milestone 4 adds one compact table surface for candidate review and keeps the rest of the dashboard behavior unchanged. The candidate table is informational only and must not imply that candidate rows are official, verified, or count-bearing.
+
+Because the dashboard may eventually be viewed by non-maintainer visitors, milestone 4 must not introduce any UI control, server handler, writable endpoint, or indirect side effect that lets an app visitor create, edit, review, promote, reject, or defer candidate rows. Queue state changes remain a maintainer action performed in the repository workspace.
 
 ## Data Model
 
@@ -105,6 +109,7 @@ Add a compact candidate review table to the dashboard.
 
 - The view is read-only.
 - No write actions, promotion buttons, or mutation controls in milestone 4.
+- No Shiny input or server-side observer should write candidate review decisions back to CSV files.
 - Existing plots, filters, headline cards, and count logic should remain unchanged.
 
 ## Human Review Workflow
@@ -123,6 +128,7 @@ Add a compact candidate review table to the dashboard.
 - Duplicate IDs or normalized URLs should be blocking errors because they undermine review traceability.
 - Missing review metadata for non-queued states should be blocking errors because they weaken the audit trail.
 - Candidate rows should not be allowed to silently influence count plots, headline cards, or provenance validation.
+- Candidate review state must not be writable through the app, so accidental or malicious visitor edits are out of scope by design.
 
 ## Testing Strategy
 
@@ -139,4 +145,5 @@ Regression risk is moderate because the validator command and app file both wide
 - Candidate rows have enough metadata for promotion, rejection, or deferral: handled by the required fields and status rules.
 - New candidate CSV is validated by local tests and the existing validation command: handled by adding candidate validation to `R/validate_counts.R` and test coverage.
 - Documentation explains the review path: handled by README, milestone docs, and the workflow section above.
+- Random app visitors cannot update the queue: handled by keeping queue mutations out of the Shiny UI and limiting updates to repository-managed CSV edits.
 - Verification commands remain the same: `Rscript tests/testthat.R`, `Rscript R/validate_counts.R`, and local workflow YAML parsing.
