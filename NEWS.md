@@ -1,5 +1,13 @@
 # NEWS
 
+## 0.2.2 - 2026-05-23
+
+Environment alignment verification.
+
+- Confirmed the default local `Rscript` launcher now uses R 4.6.0.
+- Confirmed `renv::status()` reports the project is in a consistent state under R 4.6.0.
+- Re-ran the test suite and curated CSV validation successfully under R 4.6.0.
+
 ## 0.2.1 - 2026-05-23
 
 Documentation cleanup and milestone 0.3 handoff.
