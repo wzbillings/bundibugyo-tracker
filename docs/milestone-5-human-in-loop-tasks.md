@@ -13,7 +13,9 @@ Complete or explicitly defer these maintainer tasks before assigning the next ag
 - Choose the first hosting target. Recommended starting options:
   - shinyapps.io for the fastest first public deployment
   - Posit Connect if there is already an available managed environment
-- Confirm whether milestone 5 should stop at deployment hardening documentation and UI safeguards, or also perform the first live deployment.
+- Confirm that milestone 5 should include the first live deployment, not only deployment hardening documentation and UI safeguards.
+- Note the long-term hosting direction: the app should eventually be self-hostable independently of a Posit-backed server, preferably alongside the maintainer's own R/Quarto website.
+- Prefer hosting and deployment steps that minimize lock-in to Posit-only platform features unless there is a clear milestone 5 need.
 
 ## Public App Boundaries
 
@@ -38,4 +40,5 @@ Complete or explicitly defer these maintainer tasks before assigning the next ag
 
 - Confirm whether any hosting secrets, account identifiers, or deployment configuration should stay outside the repository.
 - Confirm whether a pre-deploy checklist should live in the README, a dedicated deployment doc, or both.
+- Confirm which deployment details should be documented specifically to preserve a later migration path to independent self-hosting.
 - Review `docs/next-milestone-prompt.md` and adjust any local constraints before starting the next agent.

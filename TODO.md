@@ -1,11 +1,12 @@
 # TODO
 
-## Next Milestone Candidate: Milestone 5 - Public Deployment Hardening
+## Next Milestone Candidate: Milestone 5 - Public Deployment Hardening And First Live Deployment
 
-Goal: make the dashboard safe to host publicly without changing the manual curation model.
+Goal: make the dashboard safe to host publicly, complete the first live deployment, and preserve a path to later independent self-hosting without changing the manual curation model.
 
-- [ ] Choose the first hosting target, likely shinyapps.io or Posit Connect.
+- [ ] Choose the first hosting target and complete the first live deployment.
 - [ ] Add deployment documentation and required environment assumptions.
+- [ ] Prefer deployment steps and configuration that will not make later independent self-hosting, ideally alongside the maintainer's R/Quarto website, materially harder.
 - [ ] Add visible public-facing release metadata and validation status in the app.
 - [ ] Add a stronger public disclaimer near the top of the app.
 - [ ] Decide whether public source/news tables should use the current full view or a reduced default view.

@@ -5,7 +5,7 @@ Use this prompt to start the next milestone in a fresh chat:
 ```text
 You are my professional software architect and senior dev on the `bundibugyo-tracker` project. This is an R Shiny Ebola outbreak monitoring dashboard for manually curated public outbreak counts from official and humanitarian sources.
 
-Implement milestone 5: public deployment hardening. Use `docs/next-milestone-scope.md`, `docs/future-roadmap.md`, `TODO.md`, and the current app/tests as the implementation source of truth unless a more detailed milestone 5 plan has been added.
+Implement milestone 5: public deployment hardening and first live deployment. Use `docs/next-milestone-scope.md`, `docs/future-roadmap.md`, `TODO.md`, and the current app/tests as the implementation source of truth unless a more detailed milestone 5 plan has been added.
 
 Read first:
 1. `README.md`
@@ -30,6 +30,7 @@ Current state:
 - The dashboard uses dynamic headline cards, Plotly plots, DT tables, filters, caveats, a headline overflow indicator, and a read-only candidate queue table.
 - Queue edits are repository-managed only; random app visitors cannot update the review queue from the app.
 - Milestone 4 is prepared for merge as version tag `0.2.0`.
+- Milestone 5 should include the first live deployment while preserving a path to later independent self-hosting outside a Posit-managed server, ideally alongside the maintainer's R/Quarto website.
 
 Constraints:
 - Keep epidemiologic data manually curated.
@@ -40,6 +41,7 @@ Constraints:
 - Preserve negative increments as reviewable reporting artifacts.
 - Do not make `renv::status()` a hard CI gate unless the R runtime and lockfile expectations have been intentionally reconciled.
 - Keep the milestone 4 candidate-source promotion workflow intact while hardening for public hosting.
+- Avoid infrastructure choices that would make later independent self-hosting materially harder without a documented reason.
 - If human decisions in `docs/milestone-5-human-in-loop-tasks.md` are still unresolved, make conservative assumptions in the implementation plan and document them before editing code.
 
 Required verification before calling milestone 5 complete:

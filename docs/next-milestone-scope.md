@@ -10,9 +10,11 @@ Milestone 4 is prepared for merge as version tag `0.2.0`. The implementation sou
 
 ## Recommended Milestone 5
 
-**Theme:** Public deployment hardening.
+**Theme:** Public deployment hardening and first live deployment.
 
-Milestone 5 should make the dashboard safe to host publicly without changing the repo-backed manual curation model. The work should focus on deployment readiness, public-facing caveats, visible release metadata, and a stronger public review checklist before the app is exposed to non-maintainer visitors.
+Milestone 5 should make the dashboard safe to host publicly without changing the repo-backed manual curation model. The work should focus on deployment readiness, public-facing caveats, visible release metadata, a stronger public review checklist, and the first live deployment to a maintainer-approved hosting target.
+
+Milestone 5 should also preserve a clear path toward later independent self-hosting outside a Posit-managed environment, ideally alongside the maintainer's own R/Quarto website. Avoid infrastructure choices that tightly couple the app to Posit-only hosting features when a more portable option is available.
 
 ## Current State
 
@@ -27,8 +29,9 @@ Milestone 5 should make the dashboard safe to host publicly without changing the
 
 ## In Scope For Milestone 5
 
-- Choose the first hosting target, likely shinyapps.io or Posit Connect.
+- Choose the first hosting target and complete the first live deployment.
 - Add deployment documentation and required environment assumptions.
+- Prefer deployment assumptions that can later be reproduced on independently managed infrastructure, including a future self-hosted environment alongside an R/Quarto website.
 - Add visible public-facing metadata in the app, such as app version, latest data cutoff, latest source publication date, and validation status.
 - Add a stronger public disclaimer near the top of the app, not only in repository docs.
 - Decide whether public source and news tables should appear exactly as they do now or with a reduced default view.
@@ -49,6 +52,7 @@ Prefer a small deployment-hardening pass that keeps the existing Shiny app and C
 ## Acceptance Criteria
 
 - A maintainer can deploy the app from a clean checkout using documented steps.
+- The first public deployment is live on the selected hosting target.
 - The hosted app makes data caveats and source provenance visible before users interpret plots.
 - CI and local validation remain the source of confidence before deployment.
 - `Rscript tests/testthat.R` passes.

@@ -10,14 +10,15 @@ This roadmap starts after milestone 4. It is intentionally directional: each mil
 - Use CI and validation as gates before public communication or deployment.
 - Make every public-facing view clearly state that counts are public reported values, not official case surveillance data.
 
-## Milestone 5 Candidate: Public Deployment Hardening
+## Milestone 5 Candidate: Public Deployment Hardening And First Live Deployment
 
-**Goal:** make the dashboard safe to host publicly without changing the manual curation model.
+**Goal:** make the dashboard safe to host publicly, complete the first live deployment, and preserve a clean path toward later independent self-hosting without changing the manual curation model.
 
 Recommended scope:
 
-- Choose the first hosting target, likely shinyapps.io or Posit Connect.
+- Choose the first hosting target and complete the first live deployment.
 - Add deployment documentation and required environment assumptions.
+- Prefer deployment steps, configuration, and runtime assumptions that can later move off a Posit-backed server and onto independently managed infrastructure, ideally alongside the maintainer's own R/Quarto website.
 - Keep `data/*.csv` as repo-backed reviewed inputs.
 - Add visible public-facing release metadata: app version, latest data cutoff, latest source publication date, and validation status.
 - Add a stronger public disclaimer near the top of the app, not only in repository docs.
@@ -34,6 +35,7 @@ Non-goals:
 Acceptance criteria:
 
 - A maintainer can deploy the app from a clean checkout using documented steps.
+- The first public deployment is live and documented.
 - The hosted app makes data caveats and source provenance visible before users interpret plots.
 - CI and local validation remain the source of confidence before deployment.
 
@@ -69,3 +71,11 @@ Do not add automatic count extraction, database migration, or scheduled producti
 - Public deployment has a stable disclaimer, provenance display, and validation gate.
 - Maintainers have reviewed several update cycles and know which parts of CSV editing are actually painful.
 - Negative increments, source corrections, and reclassifications have documented review behavior.
+
+## Long-Term Hosting Direction
+
+The long-term preference is to self-host the app independently of a Posit-backed server, ideally in a setup that can live alongside the maintainer's own R/Quarto website. Near-term deployment decisions should therefore preserve portability:
+
+- avoid unnecessary dependence on Posit-specific operational features when a portable alternative is reasonable
+- keep startup, configuration, and asset assumptions documented in a way that can be reproduced on non-Posit infrastructure
+- prefer repository-level docs and app-level metadata/disclaimer behavior that will still make sense after a future hosting migration

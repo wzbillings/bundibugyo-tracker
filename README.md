@@ -77,7 +77,7 @@ The fourth milestone added a reviewed source-discovery queue. It records candida
 
 ## Fifth Milestone Candidate
 
-The next milestone should focus on public deployment hardening. It should make the dashboard safe to host publicly without changing the repo-backed manual curation model, while keeping candidate queue edits and reviewed count updates out of the hosted app itself. See `docs/next-milestone-scope.md` and `docs/milestone-5-human-in-loop-tasks.md` for the current milestone 5 handoff package.
+The next milestone should focus on public deployment hardening and the first live deployment. It should make the dashboard safe to host publicly without changing the repo-backed manual curation model, while keeping candidate queue edits and reviewed count updates out of the hosted app itself. It should also avoid infrastructure choices that make a later independent self-hosted deployment, ideally alongside the maintainer's R/Quarto website, materially harder than necessary. See `docs/next-milestone-scope.md` and `docs/milestone-5-human-in-loop-tasks.md` for the current milestone 5 handoff package.
 
 ## Future Roadmap
 
