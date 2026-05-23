@@ -20,6 +20,7 @@ counts <- read_counts("data/outbreak_counts.csv")
 epicurve <- make_epicurve_data(counts)
 source_log <- read_source_log("data/source_log.csv")
 news_highlights <- read_news_highlights("data/news_highlights.csv")
+source_candidates <- read_source_candidates("data/source_candidates.csv")
 
 all_choice <- "All"
 count_dates <- range(counts$data_cutoff_date, na.rm = TRUE)
@@ -70,6 +71,30 @@ escape_table_display_fields <- function(data, exclude = character()) {
 
   data %>%
     mutate(across(all_of(fields), ~ as.character(htmltools::htmlEscape(.x, attribute = FALSE))))
+}
+
+candidate_queue_table_data <- function(data) {
+  data %>%
+    arrange(desc(discovered_at), source_name) %>%
+    mutate(
+      discovered_at = format(discovered_at, "%Y-%m-%d %H:%M:%S UTC"),
+      publication_date = format(publication_date, "%Y-%m-%d"),
+      link = format_link(url)
+    ) %>%
+    select(
+      discovered_at,
+      source_name,
+      title,
+      link,
+      publication_date,
+      source_type,
+      country,
+      discovery_method,
+      review_status,
+      review_notes,
+      promoted_source_id
+    ) %>%
+    escape_table_display_fields(exclude = "link")
 }
 
 latest_summary_rows <- function(data) {
@@ -183,7 +208,7 @@ ui <- bslib::page_fluid(
     )
   ),
   bslib::layout_columns(
-    col_widths = c(7, 5),
+    col_widths = c(4, 4, 4),
     bslib::card(
       bslib::card_header("Source Log"),
       DTOutput("source_log_table")
@@ -191,6 +216,16 @@ ui <- bslib::page_fluid(
     bslib::card(
       bslib::card_header("News Highlights"),
       DTOutput("news_highlights_table")
+    ),
+    bslib::card(
+      bslib::card_header("Candidate Source Queue"),
+      bslib::card_body(
+        tags$p(
+          class = "increment-caveat",
+          "Read-only review metadata only. Candidate rows do not update outbreak counts until a human promotes them."
+        ),
+        DTOutput("candidate_queue_table")
+      )
     )
   ),
   bslib::card(
@@ -362,6 +397,15 @@ server <- function(input, output, session) {
 
     datatable(
       table_data,
+      escape = FALSE,
+      rownames = FALSE,
+      options = list(pageLength = 10, scrollX = TRUE)
+    )
+  })
+
+  output$candidate_queue_table <- renderDT({
+    datatable(
+      candidate_queue_table_data(source_candidates),
       escape = FALSE,
       rownames = FALSE,
       options = list(pageLength = 10, scrollX = TRUE)

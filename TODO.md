@@ -1,14 +1,23 @@
 # TODO
 
-## Next Milestone Candidate: Milestone 4 - Reviewed Source Discovery Queue
+## Next Milestone Candidate: Milestone 5 - Public Deployment Hardening
 
-Goal: discover candidate official or humanitarian source updates without writing epidemiologic counts automatically.
+Goal: make the dashboard safe to host publicly without changing the manual curation model.
 
-- [ ] Add source discovery into a candidate queue or source-log staging file only.
-- [ ] Keep discovered sources separate from reviewed `data/source_log.csv` rows until a human marks them reviewed.
-- [ ] Add a dashboard or report view for unreviewed candidate sources if it remains lightweight.
-- [ ] Use `docs/milestone-4-human-in-loop-tasks.md` to confirm maintainer decisions before implementation.
-- [ ] Do not update `data/outbreak_counts.csv` from source discovery.
+- [ ] Choose the first hosting target, likely shinyapps.io or Posit Connect.
+- [ ] Add deployment documentation and required environment assumptions.
+- [ ] Add visible public-facing release metadata and validation status in the app.
+- [ ] Add a stronger public disclaimer near the top of the app.
+- [ ] Decide whether public source/news tables should use the current full view or a reduced default view.
+- [ ] Add a pre-deploy checklist that requires tests and CSV validation to pass.
+
+## Completed Milestone 4
+
+- [x] Added `data/source_candidates.csv` as a candidate-source review queue.
+- [x] Kept candidate sources separate from reviewed `data/source_log.csv` rows until manual promotion.
+- [x] Added a read-only dashboard review table for candidate sources.
+- [x] Extended `R/validate_counts.R` and tests to cover the candidate queue.
+- [x] Kept `data/outbreak_counts.csv` manually curated only.
 
 ## Later Milestones
 

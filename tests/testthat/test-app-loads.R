@@ -20,6 +20,18 @@ test_that("app.R exposes table link helper", {
   expect_match(env$format_link("https://example.org/report"), "<a href=")
 })
 
+test_that("app.R loads source candidates for the dashboard", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  expect_true(exists("source_candidates", envir = env))
+  expect_gt(nrow(env$source_candidates), 0)
+})
+
 test_that("format_link escapes href attribute quotes", {
   old_wd <- getwd()
   on.exit(setwd(old_wd), add = TRUE)
@@ -55,6 +67,36 @@ test_that("table display fields are escaped before raw DT rendering", {
   expect_identical(escaped$title, "&lt;b&gt;raw title&lt;/b&gt;")
   expect_identical(escaped$summary, "&lt;script&gt;alert(1)&lt;/script&gt;")
   expect_match(escaped$link, "<a href=", fixed = TRUE)
+})
+
+test_that("candidate queue table data escapes raw text and preserves links", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  candidate_data <- data.frame(
+    discovered_at = as.POSIXct("2026-05-23 08:00:00", tz = "UTC"),
+    source_name = "WHO Disease Outbreak News",
+    title = "<b>candidate title</b>",
+    url = "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON604",
+    publication_date = as.Date("2026-05-22"),
+    source_type = "disease_outbreak_news",
+    country = "Democratic Republic of the Congo",
+    discovery_method = "manual_search",
+    review_status = "queued",
+    review_notes = "<script>alert(1)</script>",
+    promoted_source_id = "",
+    stringsAsFactors = FALSE
+  )
+
+  table_data <- env$candidate_queue_table_data(candidate_data)
+
+  expect_identical(table_data$title, "&lt;b&gt;candidate title&lt;/b&gt;")
+  expect_identical(table_data$review_notes, "&lt;script&gt;alert(1)&lt;/script&gt;")
+  expect_match(table_data$link, "<a href=", fixed = TRUE)
 })
 
 test_that("latest_summary_rows includes classified death rows", {
@@ -117,4 +159,16 @@ test_that("headline overflow card renders visible hidden-strata indicator", {
 
   expect_match(as.character(overflow_card), "+2 more strata", fixed = TRUE)
   expect_match(as.character(overflow_card), "Additional current strata", fixed = TRUE)
+})
+
+test_that("candidate queue table output is defined for read-only review", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  expect_true(any(grepl("candidate_queue_table", capture.output(str(env$ui)), fixed = TRUE)))
+  expect_true(exists("candidate_queue_table_data", envir = env))
 })

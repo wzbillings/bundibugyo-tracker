@@ -60,6 +60,32 @@ valid_news_fixture <- function(url = "https://www.who.int/news-highlight") {
   )
 }
 
+valid_candidate_fixture <- function(
+  candidate_id = "cand-1",
+  url = "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON604",
+  review_status = "queued",
+  reviewed_at = "",
+  promoted_source_id = ""
+) {
+  data.frame(
+    candidate_id = candidate_id,
+    discovered_at = "2026-05-23T08:00:00Z",
+    source_name = "WHO Disease Outbreak News",
+    title = "Ebola disease caused by Bundibugyo virus - follow-up update",
+    url = url,
+    publication_date = "2026-05-22",
+    source_type = "disease_outbreak_news",
+    country = "Democratic Republic of the Congo",
+    keywords = "Ebola; Bundibugyo; DRC",
+    discovery_method = "manual_search",
+    review_status = review_status,
+    review_notes = "Queued for maintainer review.",
+    reviewed_at = reviewed_at,
+    promoted_source_id = promoted_source_id,
+    stringsAsFactors = FALSE
+  )
+}
+
 test_that("validate_counts_data returns no errors for valid data", {
   result <- validate_counts_data(valid_counts_fixture())
 
@@ -257,4 +283,87 @@ test_that("source log and news highlight validators flag missing required dates"
   expect_true(any(grepl("Missing source_log publication_date", source_result$errors)))
   expect_true(any(grepl("Missing source_log retrieved_at", source_result$errors)))
   expect_true(any(grepl("Missing news_highlights date", news_result$errors)))
+})
+
+test_that("validate_source_candidates_data returns no errors for valid queued data", {
+  result <- validate_source_candidates_data(valid_candidate_fixture())
+
+  expect_equal(result$errors, character())
+})
+
+test_that("validate_source_candidates_data flags invalid review status", {
+  candidate <- valid_candidate_fixture(review_status = "pending")
+
+  result <- validate_source_candidates_data(candidate)
+
+  expect_true(any(grepl("Invalid source_candidates review_status", result$errors)))
+})
+
+test_that("validate_source_candidates_data flags sample and malformed urls", {
+  candidates <- rbind(
+    valid_candidate_fixture(candidate_id = "cand-1", url = "https://example.org/report"),
+    valid_candidate_fixture(candidate_id = "cand-2", url = "not-a-url")
+  )
+
+  result <- validate_source_candidates_data(candidates)
+
+  expect_true(any(grepl("Sample source_candidates url", result$errors)))
+  expect_true(any(grepl("Invalid source_candidates url", result$errors)))
+})
+
+test_that("validate_source_candidates_data flags duplicate candidate ids", {
+  candidates <- rbind(
+    valid_candidate_fixture(candidate_id = "cand-1"),
+    valid_candidate_fixture(candidate_id = "cand-1", url = "https://www.cdc.gov/example")
+  )
+
+  result <- validate_source_candidates_data(candidates)
+
+  expect_true(any(grepl("Duplicate source_candidates candidate_id values", result$errors)))
+})
+
+test_that("validate_source_candidates_data flags duplicate urls after trimming whitespace", {
+  candidates <- rbind(
+    valid_candidate_fixture(candidate_id = "cand-1"),
+    valid_candidate_fixture(
+      candidate_id = "cand-2",
+      url = "  https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON604  "
+    )
+  )
+
+  result <- validate_source_candidates_data(candidates)
+
+  expect_true(any(grepl("Duplicate source_candidates url values", result$errors)))
+})
+
+test_that("validate_source_candidates_data requires reviewed_at for reviewed candidates", {
+  candidate <- valid_candidate_fixture(review_status = "reviewed", reviewed_at = "")
+
+  result <- validate_source_candidates_data(candidate)
+
+  expect_true(any(grepl("reviewed candidates require reviewed_at", result$errors)))
+})
+
+test_that("validate_source_candidates_data requires blank promoted_source_id unless promoted", {
+  candidate <- valid_candidate_fixture(
+    review_status = "reviewed",
+    reviewed_at = "2026-05-23T09:30:00Z",
+    promoted_source_id = "who-don-604"
+  )
+
+  result <- validate_source_candidates_data(candidate)
+
+  expect_true(any(grepl("Only promoted candidates may set promoted_source_id", result$errors)))
+})
+
+test_that("validate_source_candidates_data requires promoted_source_id for promoted candidates", {
+  candidate <- valid_candidate_fixture(
+    review_status = "promoted",
+    reviewed_at = "2026-05-23T09:30:00Z",
+    promoted_source_id = ""
+  )
+
+  result <- validate_source_candidates_data(candidate)
+
+  expect_true(any(grepl("Promoted candidates require promoted_source_id", result$errors)))
 })
