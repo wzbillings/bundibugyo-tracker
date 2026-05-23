@@ -1,20 +1,40 @@
 # NEWS
 
+## 0.1.0 - 2026-05-23
+
+Milestone 3 adds CI and stricter manual curation guardrails before any source discovery or deployment work.
+
+### CI
+
+- Added GitHub Actions validation for the R test suite and curated CSV validation script.
+- Restored dependencies in CI from `renv.lock`.
+
+### Curation
+
+- Added a manual reviewer checklist for CSV updates.
+- Required count rows to match reviewed source-log entries by normalized `(source_name, source_url)` pair.
+- Normalized source-log URLs before duplicate checks.
+- Prepared milestone 4 scope, next-agent prompt, and human-in-the-loop handoff checklist.
+
+### Dashboard
+
+- Added a visible headline overflow indicator when more than six current summary strata match the active filters.
+
 ## 0.0.3 - 2026-05-23
 
-Documentation cleanup, milestone 0.3 handoff, and environment alignment verification.
+Documentation cleanup, milestone 3 handoff, and environment alignment verification.
 
 - Updated README milestone, license, and disclaimer sections.
-- Consolidated milestone 0.3 scope so the detailed implementation plan is the source of truth.
+- Consolidated milestone 3 scope so the detailed implementation plan is the source of truth.
 - Rewrote the next-agent prompt as a concise handoff.
-- Added the milestone 0.3 implementation plan under `docs/superpowers/plans/`.
+- Added the milestone 3 implementation plan under `docs/superpowers/plans/`.
 - Confirmed the default local `Rscript` launcher now uses R 4.6.0.
 - Confirmed `renv::status()` reports the project is in a consistent state under R 4.6.0.
 - Re-ran the test suite and curated CSV validation successfully under R 4.6.0.
 
 ## 0.0.2 - 2026-05-23
 
-Milestone 0.2 replaces the milestone 0.1 sample workflow with a first reviewed public-source dataset and stronger manual curation guardrails.
+Milestone 2 replaces the milestone 1 sample workflow with a first reviewed public-source dataset and stronger manual curation guardrails.
 
 ### Data
 
@@ -37,11 +57,11 @@ Milestone 0.2 replaces the milestone 0.1 sample workflow with a first reviewed p
 ### Documentation
 
 - Added manual curation conventions to the README.
-- Added the milestone 0.2 implementation plan under `docs/superpowers/plans/`.
+- Added the milestone 2 implementation plan under `docs/superpowers/plans/`.
 
 ## 0.0.1 - 2026-05-22
 
-Milestone 0.1 established the local-first manual CSV dashboard.
+Milestone 1 established the local-first manual CSV dashboard.
 
 ### Initial Dashboard
 

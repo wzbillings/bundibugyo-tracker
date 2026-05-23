@@ -1,25 +1,23 @@
 # TODO
 
-## Next Milestone Candidate: 0.3 - CI And Curation Guardrails
+## Next Milestone Candidate: Milestone 4 - Reviewed Source Discovery Queue
 
-Goal: make the manual workflow harder to break before adding source discovery or deployment.
+Goal: discover candidate official or humanitarian source updates without writing epidemiologic counts automatically.
 
-- [ ] Add GitHub Actions validation for `Rscript tests/testthat.R`.
-- [ ] Add GitHub Actions validation for `Rscript R/validate_counts.R`.
-- [ ] Document CSV data-entry rules in a compact reviewer checklist.
-- [ ] Validate count `(source_url, source_name)` pairs against `data/source_log.csv`.
-- [ ] Normalize source-log duplicate URL checks before comparison.
-- [ ] Add a visible overflow indicator when headline cards show only the first six latest strata.
+- [ ] Add source discovery into a candidate queue or source-log staging file only.
+- [ ] Keep discovered sources separate from reviewed `data/source_log.csv` rows until a human marks them reviewed.
+- [ ] Add a dashboard or report view for unreviewed candidate sources if it remains lightweight.
+- [ ] Use `docs/milestone-4-human-in-loop-tasks.md` to confirm maintainer decisions before implementation.
+- [ ] Do not update `data/outbreak_counts.csv` from source discovery.
 
 ## Later Milestones
 
-- [ ] Add ReliefWeb/WHO source discovery into `data/source_log.csv` only.
 - [ ] Add a detected-updates tab that separates machine-discovered source candidates from human-reviewed highlights.
 - [ ] Design a curated queryable news database while keeping contextual news separate from epidemiologic counts.
 - [ ] Add shinyapps.io deployment after CI and manual validation are trusted.
 - [ ] Consider a review-friendly data entry backend after CSV workflow constraints are better understood.
 
-## Deferred From Milestone 0.2
+## Deferred From Milestone 2
 
 - [ ] Do not automate case-count extraction yet.
 - [ ] Do not scrape PDFs for epidemiologic counts yet.
