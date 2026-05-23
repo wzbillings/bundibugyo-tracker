@@ -12,6 +12,7 @@ Goal: discover candidate official or humanitarian source updates without writing
 
 ## Later Milestones
 
+- [ ] Plan milestone 5 public deployment hardening from `docs/future-roadmap.md`.
 - [ ] Add a detected-updates tab that separates machine-discovered source candidates from human-reviewed highlights.
 - [ ] Design a curated queryable news database while keeping contextual news separate from epidemiologic counts.
 - [ ] Add shinyapps.io deployment after CI and manual validation are trusted.

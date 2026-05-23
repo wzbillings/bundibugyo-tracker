@@ -72,6 +72,10 @@ The third milestone added CI and curation guardrails before source discovery or 
 
 The next milestone should focus on a reviewed source-discovery queue. It may identify candidate official or humanitarian source URLs and metadata for human review, but it should not automate case-count extraction, scrape PDFs for counts, infer zero rows for missing report days, migrate to a database, deploy the app, or update `data/outbreak_counts.csv` from discovered sources.
 
+## Future Roadmap
+
+After milestone 4, see `docs/future-roadmap.md` for the current milestone 5 deployment-hardening candidate and later roadmap themes.
+
 ## License
 
 This code is licensed under the GNU Affero General Public License v3.0. In brief, AGPL-3.0 allows use, copying, modification, and redistribution under copyleft terms, and it includes source-sharing obligations for modified versions made available over a network. See `LICENSE.md` for the full license text.

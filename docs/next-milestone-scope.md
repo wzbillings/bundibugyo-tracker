@@ -60,3 +60,7 @@ Prefer a small, reviewable CSV-backed workflow for milestone 4. A likely first p
 ## Human Decisions Before Implementation
 
 See `docs/milestone-4-human-in-loop-tasks.md` for the maintainer checklist to complete before assigning milestone 4.
+
+## Roadmap After Milestone 4
+
+Milestone 4 should not absorb public hosting or broader data maintenance work. Future milestone candidates are tracked in `docs/future-roadmap.md`, with milestone 5 currently framed as public deployment hardening once the reviewed source-discovery queue is stable.

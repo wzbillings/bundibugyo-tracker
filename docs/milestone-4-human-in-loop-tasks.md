@@ -4,9 +4,9 @@ Complete or explicitly defer these maintainer tasks before assigning the next ag
 
 ## Release And CI
 
-- Confirm the `0.1.0` tag points to the milestone 3 guardrails commit after it is pushed.
-- Confirm GitHub Actions runs successfully for the pushed milestone 3 branch or tag.
-- Decide whether milestone 4 should branch from `main` after merging milestone 3, or from the `0.1.0` tag if milestone 3 will remain unmerged for a while.
+- Confirm the `0.1.1` tag points to the merged milestone 3 guardrails patch on `main`.
+- Confirm GitHub Actions runs successfully for `main` after the milestone 3 merge.
+- Branch milestone 4 from current `main` unless there is a specific reason to branch from a release tag.
 
 ## Source Discovery Boundaries
 
