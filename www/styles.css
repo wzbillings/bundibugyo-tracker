@@ -14,6 +14,12 @@
   line-height: 1.2;
 }
 
+.dashboard-card .card-caption {
+  color: #6c757d;
+  font-size: 0.78rem;
+  margin-top: 0.35rem;
+}
+
 .caveat-panel {
   border-left: 4px solid #b7791f;
   background: #fff8e6;

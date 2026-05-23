@@ -40,6 +40,36 @@ parse_count_values <- function(counts) {
   suppressWarnings(as.numeric(trimws(as.character(counts))))
 }
 
+is_http_url <- function(values) {
+  grepl(
+    "^https?://([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,}(:[0-9]+)?([/?#][^[:space:]]*)?$",
+    values,
+    ignore.case = TRUE
+  )
+}
+
+validate_url_values <- function(values, label) {
+  errors <- character()
+  trimmed <- trimws(as.character(values))
+
+  if (any(is.na(trimmed) | trimmed == "")) {
+    errors <- add_message(errors, paste("Missing", label, "values"))
+  }
+  if (any(!is.na(trimmed) & trimmed != "" & !is_http_url(trimmed))) {
+    errors <- add_message(errors, paste("Invalid", label, "values"))
+  }
+  if (any(grepl("^https?://(www\\.)?example\\.org([/:?#]|$)", trimmed, ignore.case = TRUE))) {
+    errors <- add_message(errors, paste("Sample", label, "values"))
+  }
+
+  errors
+}
+
+is_missing_value <- function(values) {
+  trimmed <- trimws(as.character(values))
+  is.na(values) | is.na(trimmed) | trimmed == ""
+}
+
 validate_counts_data <- function(data) {
   errors <- character()
   warnings <- character()
@@ -73,14 +103,27 @@ validate_counts_data <- function(data) {
     publication_dates <- suppressWarnings(lubridate::ymd(data$publication_date))
     cutoff_dates <- suppressWarnings(lubridate::ymd(data$data_cutoff_date))
 
-    invalid_publication_dates <- is.na(publication_dates) & !is.na(data$publication_date)
-    invalid_cutoff_dates <- is.na(cutoff_dates) & !is.na(data$data_cutoff_date)
+    missing_publication_dates <- is_missing_value(data$publication_date)
+    missing_cutoff_dates <- is_missing_value(data$data_cutoff_date)
+    invalid_publication_dates <- is.na(publication_dates) & !missing_publication_dates
+    invalid_cutoff_dates <- is.na(cutoff_dates) & !missing_cutoff_dates
 
+    if (any(missing_publication_dates)) {
+      errors <- add_message(errors, "Missing publication_date values")
+    }
+    if (any(missing_cutoff_dates)) {
+      errors <- add_message(errors, "Missing data_cutoff_date values")
+    }
     if (any(invalid_publication_dates)) {
       errors <- add_message(errors, "Invalid publication_date values")
     }
     if (any(invalid_cutoff_dates)) {
       errors <- add_message(errors, "Invalid data_cutoff_date values")
+    }
+
+    valid_date_pairs <- !is.na(publication_dates) & !is.na(cutoff_dates)
+    if (any(valid_date_pairs & publication_dates < cutoff_dates)) {
+      errors <- add_message(errors, "publication_date before data_cutoff_date")
     }
   }
 
@@ -97,9 +140,23 @@ validate_counts_data <- function(data) {
   }
 
   if ("source_url" %in% names(data)) {
-    missing_urls <- is.na(data$source_url) | trimws(data$source_url) == ""
-    if (any(missing_urls)) {
-      errors <- add_message(errors, "Missing source_url values")
+    errors <- c(errors, validate_url_values(data$source_url, "source_url"))
+  }
+
+  if ("case_classification" %in% names(data)) {
+    classifications <- tolower(trimws(data$case_classification))
+    invalid_classifications <- is.na(classifications) |
+      !(classifications %in% c("suspected", "probable", "confirmed", "all"))
+    if (any(invalid_classifications)) {
+      errors <- add_message(errors, "Invalid case_classification values")
+    }
+  }
+
+  if ("metric" %in% names(data)) {
+    metrics <- tolower(trimws(data$metric))
+    invalid_metrics <- is.na(metrics) | !(metrics %in% c("cases", "deaths"))
+    if (any(invalid_metrics)) {
+      errors <- add_message(errors, "Invalid metric values")
     }
   }
 
@@ -150,9 +207,134 @@ validate_counts_data <- function(data) {
   list(errors = errors, warnings = warnings)
 }
 
-run_validation <- function(path = "data/outbreak_counts.csv") {
-  data <- readr::read_csv(path, show_col_types = FALSE)
-  result <- validate_counts_data(data)
+validate_source_log_data <- function(data) {
+  errors <- character()
+
+  required_columns <- if (exists("required_source_columns")) {
+    required_source_columns
+  } else {
+    c("source_id", "source_name", "title", "url", "publication_date", "retrieved_at",
+      "source_type", "country", "keywords", "review_status", "notes")
+  }
+
+  missing_columns <- setdiff(required_columns, names(data))
+  if (length(missing_columns) > 0) {
+    errors <- add_message(errors, paste("Missing required source_log columns:", paste(missing_columns, collapse = ", ")))
+    return(list(errors = errors, warnings = character()))
+  }
+
+  errors <- c(errors, validate_url_values(data$url, "source_log url"))
+
+  publication_dates <- suppressWarnings(lubridate::ymd(data$publication_date))
+  retrieved_at <- suppressWarnings(lubridate::ymd_hms(data$retrieved_at))
+  missing_publication_dates <- is_missing_value(data$publication_date)
+  missing_retrieved_at <- is_missing_value(data$retrieved_at)
+
+  if (any(missing_publication_dates)) {
+    errors <- add_message(errors, "Missing source_log publication_date values")
+  }
+  if (any(missing_retrieved_at)) {
+    errors <- add_message(errors, "Missing source_log retrieved_at values")
+  }
+  if (any(is.na(publication_dates) & !missing_publication_dates)) {
+    errors <- add_message(errors, "Invalid source_log publication_date values")
+  }
+  if (any(is.na(retrieved_at) & !missing_retrieved_at)) {
+    errors <- add_message(errors, "Invalid source_log retrieved_at values")
+  }
+
+  review_status <- tolower(trimws(data$review_status))
+  if (any(is.na(review_status) | !(review_status %in% c("queued", "reviewed", "extracted", "rejected")))) {
+    errors <- add_message(errors, "Invalid source_log review_status values")
+  }
+
+  if (any(duplicated(data$source_id))) {
+    errors <- add_message(errors, "Duplicate source_log source_id values")
+  }
+  if (any(duplicated(data$url))) {
+    errors <- add_message(errors, "Duplicate source_log url values")
+  }
+
+  list(errors = errors, warnings = character())
+}
+
+validate_news_highlights_data <- function(data) {
+  errors <- character()
+
+  required_columns <- if (exists("required_news_columns")) {
+    required_news_columns
+  } else {
+    c("date", "source", "title", "url", "summary", "category", "is_official", "notes")
+  }
+
+  missing_columns <- setdiff(required_columns, names(data))
+  if (length(missing_columns) > 0) {
+    errors <- add_message(errors, paste("Missing required news_highlights columns:", paste(missing_columns, collapse = ", ")))
+    return(list(errors = errors, warnings = character()))
+  }
+
+  errors <- c(errors, validate_url_values(data$url, "news_highlights url"))
+
+  dates <- suppressWarnings(lubridate::ymd(data$date))
+  missing_dates <- is_missing_value(data$date)
+  if (any(missing_dates)) {
+    errors <- add_message(errors, "Missing news_highlights date values")
+  }
+  if (any(is.na(dates) & !missing_dates)) {
+    errors <- add_message(errors, "Invalid news_highlights date values")
+  }
+
+  categories <- tolower(trimws(data$category))
+  if (any(is.na(categories) | !(categories %in% c("epidemiology", "response", "policy", "operations", "context")))) {
+    errors <- add_message(errors, "Invalid news_highlights category values")
+  }
+
+  official <- tolower(trimws(as.character(data$is_official)))
+  if (any(is.na(official) | !(official %in% c("true", "false")))) {
+    errors <- add_message(errors, "Invalid news_highlights is_official values")
+  }
+
+  list(errors = errors, warnings = character())
+}
+
+combine_validation_results <- function(results) {
+  list(
+    errors = unlist(lapply(results, `[[`, "errors"), use.names = FALSE),
+    warnings = unlist(lapply(results, `[[`, "warnings"), use.names = FALSE)
+  )
+}
+
+validate_all_data <- function(counts, source_log, news_highlights) {
+  result <- combine_validation_results(list(
+    validate_counts_data(counts),
+    validate_source_log_data(source_log),
+    validate_news_highlights_data(news_highlights)
+  ))
+
+  if (all(c("source_url") %in% names(counts)) && "url" %in% names(source_log)) {
+    count_urls <- trimws(as.character(counts$source_url))
+    source_urls <- trimws(as.character(source_log$url))
+    count_urls <- unique(count_urls[!is.na(count_urls) & count_urls != ""])
+    source_urls <- unique(source_urls[!is.na(source_urls) & source_urls != ""])
+    missing_count_urls <- setdiff(count_urls, source_urls)
+    if (length(missing_count_urls) > 0) {
+      result$errors <- add_message(result$errors, "count source_url values missing from source_log")
+    }
+  }
+
+  result
+}
+
+run_validation <- function(
+  counts_path = "data/outbreak_counts.csv",
+  source_log_path = "data/source_log.csv",
+  news_highlights_path = "data/news_highlights.csv"
+) {
+  counts <- readr::read_csv(counts_path, show_col_types = FALSE)
+  source_log <- readr::read_csv(source_log_path, show_col_types = FALSE)
+  news_highlights <- readr::read_csv(news_highlights_path, show_col_types = FALSE)
+
+  result <- validate_all_data(counts, source_log, news_highlights)
 
   for (warning in result$warnings) {
     message("WARNING: ", warning)
