@@ -14,6 +14,7 @@ Milestone 3 adds CI and stricter manual curation guardrails before any source di
 - Added a manual reviewer checklist for CSV updates.
 - Required count rows to match reviewed source-log entries by normalized `(source_name, source_url)` pair.
 - Normalized source-log URLs before duplicate checks.
+- Prepared milestone 4 scope, next-agent prompt, and human-in-the-loop handoff checklist.
 
 ### Dashboard
 

@@ -7,6 +7,7 @@ Goal: discover candidate official or humanitarian source updates without writing
 - [ ] Add source discovery into a candidate queue or source-log staging file only.
 - [ ] Keep discovered sources separate from reviewed `data/source_log.csv` rows until a human marks them reviewed.
 - [ ] Add a dashboard or report view for unreviewed candidate sources if it remains lightweight.
+- [ ] Use `docs/milestone-4-human-in-loop-tasks.md` to confirm maintainer decisions before implementation.
 - [ ] Do not update `data/outbreak_counts.csv` from source discovery.
 
 ## Later Milestones
