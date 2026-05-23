@@ -15,16 +15,95 @@ load_package("plotly")
 
 suppressWarnings(source("R/clean_counts.R"))
 suppressWarnings(source("R/make_epicurve_data.R"))
+suppressWarnings(source("R/validate_counts.R"))
 
-counts <- read_counts("data/outbreak_counts.csv")
-epicurve <- make_epicurve_data(counts)
-source_log <- read_source_log("data/source_log.csv")
-news_highlights <- read_news_highlights("data/news_highlights.csv")
-source_candidates <- read_source_candidates("data/source_candidates.csv")
-
+full_disclaimer_url <- "https://github.com/wzbillings/bundibugyo-tracker#disclaimer"
 all_choice <- "All"
-count_dates <- range(counts$data_cutoff_date, na.rm = TRUE)
 max_headline_summary_cards <- 6
+
+read_app_version <- function(path = "VERSION") {
+  if (!file.exists(path)) {
+    return("Unknown")
+  }
+
+  version_value <- readLines(path, warn = FALSE, n = 1, encoding = "UTF-8")
+  version_value <- trimws(version_value)
+
+  if (length(version_value) == 0 || identical(version_value, "")) {
+    return("Unknown")
+  }
+
+  version_value
+}
+
+public_disclaimer_html <- function() {
+  tags$div(
+    class = "public-disclaimer-banner",
+    tags$span(
+      "Unofficial exploratory dashboard; verify all information against original and official sources before use. See the full disclaimer: "
+    ),
+    tags$a(
+      "README disclaimer",
+      href = full_disclaimer_url,
+      target = "_blank",
+      rel = "noopener noreferrer"
+    ),
+    tags$span(".")
+  )
+}
+
+format_latest_date <- function(data) {
+  if (nrow(data) == 0 || all(is.na(data$data_cutoff_date))) {
+    return("No data")
+  }
+
+  format(max(data$data_cutoff_date, na.rm = TRUE), "%Y-%m-%d")
+}
+
+format_latest_reviewed_source_date <- function(data) {
+  reviewed_sources <- data %>%
+    filter(review_status == "reviewed")
+
+  if (nrow(reviewed_sources) == 0 || all(is.na(reviewed_sources$publication_date))) {
+    return("No data")
+  }
+
+  format(max(reviewed_sources$publication_date, na.rm = TRUE), "%Y-%m-%d")
+}
+
+summarize_validation_status <- function(result) {
+  if (length(result$errors) > 0) {
+    return(list(label = "Failed", class_name = "metadata-status-failed"))
+  }
+
+  if (length(result$warnings) > 0) {
+    return(list(label = "Passed with warnings", class_name = "metadata-status-warning"))
+  }
+
+  list(label = "Passed", class_name = "metadata-status-passed")
+}
+
+abort_if_validation_errors <- function(result) {
+  if (length(result$errors) > 0) {
+    stop(
+      "Curated data validation failed: ",
+      paste(unique(result$errors), collapse = "; "),
+      call. = FALSE
+    )
+  }
+
+  invisible(result)
+}
+
+metadata_card <- function(title, value, class_name = "") {
+  bslib::card(
+    class = paste("dashboard-card metadata-card", class_name),
+    bslib::card_body(
+      tags$div(class = "card-title", title),
+      tags$div(class = "card-value", value)
+    )
+  )
+}
 
 select_choices <- function(values) {
   c(all_choice, sort(unique(as.character(values))))
@@ -38,32 +117,12 @@ filter_for_choice <- function(data, column, choice) {
   }
 }
 
-format_latest_value <- function(data) {
-  if (nrow(data) == 0 || all(is.na(data$count))) {
-    return("No data")
-  }
-
-  latest_date <- max(data$data_cutoff_date, na.rm = TRUE)
-  latest_rows <- data %>%
-    filter(data_cutoff_date == latest_date)
-
-  if (nrow(latest_rows) == 0 || all(is.na(latest_rows$count))) {
-    return("No data")
-  }
-
-  format(max(latest_rows$count, na.rm = TRUE), big.mark = ",")
-}
-
-format_latest_date <- function(data) {
-  if (nrow(data) == 0 || all(is.na(data$data_cutoff_date))) {
-    return("No data")
-  }
-
-  format(max(data$data_cutoff_date, na.rm = TRUE), "%Y-%m-%d")
-}
-
 format_link <- function(url) {
-  paste0("<a href=\"", htmltools::htmlEscape(url, attribute = TRUE), "\" target=\"_blank\" rel=\"noopener noreferrer\">Open</a>")
+  paste0(
+    "<a href=\"",
+    htmltools::htmlEscape(url, attribute = TRUE),
+    "\" target=\"_blank\" rel=\"noopener noreferrer\">Open</a>"
+  )
 }
 
 escape_table_display_fields <- function(data, exclude = character()) {
@@ -71,6 +130,28 @@ escape_table_display_fields <- function(data, exclude = character()) {
 
   data %>%
     mutate(across(all_of(fields), ~ as.character(htmltools::htmlEscape(.x, attribute = FALSE))))
+}
+
+source_log_table_data <- function(data) {
+  data %>%
+    arrange(desc(publication_date), source_name) %>%
+    mutate(
+      publication_date = format(publication_date, "%Y-%m-%d"),
+      link = format_link(url)
+    ) %>%
+    select(publication_date, source_name, title, country, link) %>%
+    escape_table_display_fields(exclude = "link")
+}
+
+news_highlights_table_data <- function(data) {
+  data %>%
+    arrange(desc(date), source) %>%
+    mutate(
+      date = format(date, "%Y-%m-%d"),
+      link = format_link(url)
+    ) %>%
+    select(date, source, title, summary, category, is_official, link) %>%
+    escape_table_display_fields(exclude = "link")
 }
 
 candidate_queue_table_data <- function(data) {
@@ -171,67 +252,115 @@ caveats <- c(
   "Country-level curves hide subnational heterogeneity."
 )
 
+raw_counts <- readr::read_csv("data/outbreak_counts.csv", show_col_types = FALSE)
+raw_source_log <- readr::read_csv("data/source_log.csv", show_col_types = FALSE)
+raw_news_highlights <- readr::read_csv("data/news_highlights.csv", show_col_types = FALSE)
+raw_source_candidates <- readr::read_csv("data/source_candidates.csv", show_col_types = FALSE)
+
+validation_result <- validate_all_data(
+  raw_counts,
+  raw_source_log,
+  raw_news_highlights,
+  raw_source_candidates
+)
+abort_if_validation_errors(validation_result)
+
+counts <- clean_counts(raw_counts)
+epicurve <- make_epicurve_data(counts)
+source_log <- clean_source_log(raw_source_log)
+news_highlights <- clean_news_highlights(raw_news_highlights)
+source_candidates <- clean_source_candidates(raw_source_candidates)
+
+app_version <- read_app_version("VERSION")
+validation_status <- summarize_validation_status(validation_result)
+latest_count_cutoff <- format_latest_date(counts)
+latest_reviewed_source_date <- format_latest_reviewed_source_date(source_log)
+count_dates <- range(counts$data_cutoff_date, na.rm = TRUE)
+
 ui <- bslib::page_fluid(
   theme = bslib::bs_theme(version = 5, bootswatch = "flatly"),
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")),
-  h2("Ebola Outbreak Monitoring Dashboard"),
-  p("Manually curated public counts from reviewed official and humanitarian reports."),
-  uiOutput("headline_cards"),
-  bslib::card(
-    bslib::card_header("Filters"),
-    bslib::card_body(
-      div(
-        class = "row filter-row",
-        div(class = "col-md-2", selectInput("source", "Source", select_choices(counts$source_name), selectize = FALSE)),
-        div(class = "col-md-2", selectInput("country", "Country", select_choices(counts$country), selectize = FALSE)),
-        div(class = "col-md-2", selectInput("classification", "Case classification", select_choices(counts$case_classification), selectize = FALSE)),
-        div(class = "col-md-2", selectInput("metric", "Metric", select_choices(counts$metric), selectize = FALSE)),
-        div(class = "col-md-4", dateRangeInput("date_range", "Date range", start = count_dates[[1]], end = count_dates[[2]], min = count_dates[[1]], max = count_dates[[2]]))
-      )
-    )
-  ),
-  bslib::layout_columns(
-    col_widths = c(6, 6),
-    bslib::card(
-      bslib::card_header("Cumulative Public Reports"),
-      plotlyOutput("cumulative_plot", height = "390px")
+  tags$div(
+    class = "app-shell",
+    h2("Ebola Outbreak Monitoring Dashboard"),
+    p("Manually curated public counts from reviewed official and humanitarian reports."),
+    public_disclaimer_html(),
+    bslib::layout_columns(
+      col_widths = c(3, 3, 3, 3),
+      metadata_card("App version", app_version),
+      metadata_card("Latest count cutoff date", latest_count_cutoff),
+      metadata_card("Latest reviewed source publication date", latest_reviewed_source_date),
+      metadata_card("Validation status", validation_status$label, validation_status$class_name)
     ),
+    uiOutput("headline_cards"),
     bslib::card(
-      bslib::card_header("Reported Increments"),
+      bslib::card_header("Filters"),
       bslib::card_body(
-        tags$p(
-          class = "increment-caveat",
-          "Daily values are derived from changes in cumulative public reports and may reflect reporting artifacts."
-        ),
-        plotlyOutput("increment_plot", height = "340px")
+        div(
+          class = "row filter-row",
+          div(class = "col-md-2", selectInput("source", "Source", select_choices(counts$source_name), selectize = FALSE)),
+          div(class = "col-md-2", selectInput("country", "Country", select_choices(counts$country), selectize = FALSE)),
+          div(class = "col-md-2", selectInput("classification", "Case classification", select_choices(counts$case_classification), selectize = FALSE)),
+          div(class = "col-md-2", selectInput("metric", "Metric", select_choices(counts$metric), selectize = FALSE)),
+          div(class = "col-md-4", dateRangeInput("date_range", "Date range", start = count_dates[[1]], end = count_dates[[2]], min = count_dates[[1]], max = count_dates[[2]]))
+        )
       )
-    )
-  ),
-  bslib::layout_columns(
-    col_widths = c(4, 4, 4),
-    bslib::card(
-      bslib::card_header("Source Log"),
-      DTOutput("source_log_table")
+    ),
+    bslib::layout_columns(
+      col_widths = c(6, 6),
+      bslib::card(
+        bslib::card_header("Cumulative Public Reports"),
+        plotlyOutput("cumulative_plot", height = "390px")
+      ),
+      bslib::card(
+        bslib::card_header("Reported Increments"),
+        bslib::card_body(
+          tags$p(
+            class = "increment-caveat",
+            "Daily values are derived from changes in cumulative public reports and may reflect reporting artifacts."
+          ),
+          plotlyOutput("increment_plot", height = "340px")
+        )
+      )
+    ),
+    bslib::layout_columns(
+      col_widths = c(4, 4, 4),
+      bslib::card(
+        bslib::card_header("Source Log"),
+        bslib::card_body(
+          tags$p(
+            class = "table-note",
+            "Reduced default view for public browsing. Full reviewed source metadata remain available in the repository."
+          ),
+          DTOutput("source_log_table")
+        )
+      ),
+      bslib::card(
+        bslib::card_header("News Highlights"),
+        bslib::card_body(
+          tags$p(
+            class = "table-note",
+            "Reduced default view for public browsing. Full contextual review notes remain available in the repository."
+          ),
+          DTOutput("news_highlights_table")
+        )
+      ),
+      bslib::card(
+        bslib::card_header("Candidate Source Queue"),
+        bslib::card_body(
+          tags$p(
+            class = "increment-caveat",
+            "Read-only review metadata. Candidate rows do not update outbreak counts until a human promotes them."
+          ),
+          DTOutput("candidate_queue_table")
+        )
+      )
     ),
     bslib::card(
-      bslib::card_header("News Highlights"),
-      DTOutput("news_highlights_table")
-    ),
-    bslib::card(
-      bslib::card_header("Candidate Source Queue"),
-      bslib::card_body(
-        tags$p(
-          class = "increment-caveat",
-          "Read-only review metadata. Candidate rows do not update outbreak counts until a human promotes them."
-        ),
-        DTOutput("candidate_queue_table")
-      )
+      class = "caveat-panel",
+      bslib::card_header("Caveats"),
+      bslib::card_body(tags$ul(lapply(caveats, tags$li)))
     )
-  ),
-  bslib::card(
-    class = "caveat-panel",
-    bslib::card_header("Caveats"),
-    bslib::card_body(tags$ul(lapply(caveats, tags$li)))
   )
 )
 
@@ -293,7 +422,7 @@ server <- function(input, output, session) {
       c(
         list(
           col_widths = c(12, rep(4, length(summary_cards))),
-          headline_card("Latest cutoff", "latest_cutoff")
+          headline_card("Latest filtered cutoff", "latest_cutoff")
         ),
         summary_cards
       )
@@ -374,14 +503,8 @@ server <- function(input, output, session) {
   })
 
   output$source_log_table <- renderDT({
-    table_data <- source_log %>%
-      arrange(desc(publication_date), source_name) %>%
-      mutate(link = format_link(url)) %>%
-      select(source_name, title, publication_date, link, review_status, notes) %>%
-      escape_table_display_fields(exclude = "link")
-
     datatable(
-      table_data,
+      source_log_table_data(source_log),
       escape = FALSE,
       rownames = FALSE,
       options = list(pageLength = 10, scrollX = TRUE)
@@ -389,14 +512,8 @@ server <- function(input, output, session) {
   })
 
   output$news_highlights_table <- renderDT({
-    table_data <- news_highlights %>%
-      arrange(desc(date), source) %>%
-      mutate(link = format_link(url)) %>%
-      select(date, source, title, link, summary, category, is_official) %>%
-      escape_table_display_fields(exclude = "link")
-
     datatable(
-      table_data,
+      news_highlights_table_data(news_highlights),
       escape = FALSE,
       rownames = FALSE,
       options = list(pageLength = 10, scrollX = TRUE)

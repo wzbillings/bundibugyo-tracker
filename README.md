@@ -18,6 +18,8 @@ renv::restore()
 
 The project currently disables the `renv` sandbox in `.Rprofile` because the sandbox can hang in this Windows/Codex environment. Packages are still installed into the project-local `renv` library and locked in `renv.lock`.
 
+Public deployment guidance for the Shiny app now lives in `docs/shinyapps-deployment.md`, and the release gate checklist lives in `docs/pre-deploy-checklist.md`.
+
 ## Manual Update Workflow
 
 1. Record newly discovered candidate source metadata in `data/source_candidates.csv`.
@@ -75,13 +77,13 @@ The third milestone added CI and curation guardrails before source discovery or 
 
 The fourth milestone added a reviewed source-discovery queue. It records candidate official or humanitarian source URLs and metadata for human review in `data/source_candidates.csv`, validates the queue alongside the existing reviewed CSVs, and exposes a read-only dashboard review table. It does not automate case-count extraction, scrape PDFs for counts, infer zero rows for missing report days, migrate to a database, deploy the app, or update `data/outbreak_counts.csv` from discovered sources. This milestone is planned as version tag `0.2.0` unless incremental fixes are needed first.
 
-## Fifth Milestone Candidate
+## Sixth Milestone Candidate
 
-The next milestone should focus on public deployment hardening and the first live deployment. It should make the dashboard safe to host publicly without changing the repo-backed manual curation model, while keeping candidate queue edits and reviewed count updates out of the hosted app itself. It should also avoid infrastructure choices that make a later independent self-hosted deployment, ideally alongside the maintainer's R/Quarto website, materially harder than necessary. See `docs/next-milestone-scope.md` and `docs/milestone-5-human-in-loop-tasks.md` for the current milestone 5 handoff package.
+The next milestone should focus on review-friendly data maintenance after the public deployment hardening pass. It should reduce maintainer friction around the manual CSV workflow without changing the reviewed-source promotion model, introducing public write-back, or collapsing contextual news into epidemiologic counts. See `docs/next-milestone-scope.md` and `docs/milestone-6-human-in-loop-tasks.md` for the current milestone 6 handoff package.
 
 ## Future Roadmap
 
-After milestone 4, see `docs/future-roadmap.md` for the current milestone 5 deployment-hardening candidate and later roadmap themes.
+After milestone 5, see `docs/future-roadmap.md` for the current milestone 6 maintenance candidate and later roadmap themes.
 
 ## License
 
@@ -89,6 +91,12 @@ This code is licensed under the GNU Affero General Public License v3.0. In brief
 
 ## Disclaimer
 
-Most of the code in this project was written with substantial assistance from a large language model. A human maintainer reviewed the generated code, exercised the application, and checked core functionality, but the project has not gone through the formal review, validation, or publication standards used for official WHO, CDC, Ministry of Health, or other public-health reports.
+This project is an independent, unofficial software project for monitoring and summarizing publicly available information. It is not produced, reviewed, endorsed, or approved by the World Health Organization, the U.S. Centers for Disease Control and Prevention, any Ministry of Health, the maintainer’s employer, or any other public-health authority unless explicitly stated.
 
-This dashboard is an independent software project. It is not medical advice, public-health guidance, or a statement from the maintainer's employer. Data and derived values should be verified against the original sources before being used for analysis, communication, operational planning, or decision-making. By using or relying on this service, you acknowledge that the maintainer is not liable for decisions, actions, losses, or consequences arising from use of the app or its outputs.
+The dashboard and its outputs are provided for informational and exploratory purposes only. They are not medical advice, public-health guidance, epidemiological certification, operational direction, or an official situation report. The app may contain errors, omissions, delays, misclassified events, duplicated reports, incorrect geocoding, outdated information, software defects, or derived estimates that differ from official counts.
+
+Most of the code in this project was written with substantial assistance from a large language model. A human maintainer reviewed generated code, exercised the application, and checked core functionality, but the project has not undergone the formal validation, quality assurance, peer review, security review, accessibility review, or publication processes used for official public-health reporting systems.
+
+Users should verify all data, summaries, visualizations, and derived values against the original cited sources and, where relevant, against official public-health authorities before using them for research, communication, operational planning, policy, clinical judgment, travel decisions, resource allocation, or any other decision-making purpose.
+
+Use of this project and any associated dashboard, code, data products, or outputs is at the user’s own risk. To the maximum extent permitted by applicable law, the maintainer disclaims responsibility and liability for any decisions, actions, omissions, losses, damages, or consequences arising from use of, reliance on, or inability to use the project or its outputs.

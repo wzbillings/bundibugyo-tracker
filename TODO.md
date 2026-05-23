@@ -1,34 +1,31 @@
 # TODO
 
-## Next Milestone Candidate: Milestone 5 - Public Deployment Hardening And First Live Deployment
+## Next Milestone Candidate: Milestone 6 - Review-Friendly Data Maintenance
 
-Goal: make the dashboard safe to host publicly, complete the first live deployment, and preserve a path to later independent self-hosting without changing the manual curation model.
+Goal: reduce maintainer friction around the manual CSV workflow while preserving human review, public read-only hosting, and the separation between reviewed counts, reviewed sources, contextual news, and candidate-source discovery.
 
-- [ ] Choose the first hosting target and complete the first live deployment.
-- [ ] Add deployment documentation and required environment assumptions.
-- [ ] Prefer deployment steps and configuration that will not make later independent self-hosting, ideally alongside the maintainer's R/Quarto website, materially harder.
-- [ ] Add visible public-facing release metadata and validation status in the app.
-- [ ] Add a stronger public disclaimer near the top of the app.
-- [ ] Decide whether public source/news tables should use the current full view or a reduced default view.
-- [ ] Add a pre-deploy checklist that requires tests and CSV validation to pass.
-- [ ] Use `docs/milestone-5-human-in-loop-tasks.md` to confirm maintainer decisions before implementation.
+- [ ] Decide whether the first maintenance pass should stay fully CSV-native or introduce a lightweight reviewer helper around the CSV workflow.
+- [ ] Add review-friendly helper output such as row-validation support, a reviewer summary report, or stricter stale-data warnings.
+- [ ] Keep deployment and hosting behavior read-only from the public app.
+- [ ] Preserve the manual candidate-source promotion workflow and reviewed count governance model.
+- [ ] Use `docs/milestone-6-human-in-loop-tasks.md` to confirm maintainer decisions before implementation.
 
-## Completed Milestone 4
+## Completed Milestone 5
 
-- [x] Added `data/source_candidates.csv` as a candidate-source review queue.
-- [x] Kept candidate sources separate from reviewed `data/source_log.csv` rows until manual promotion.
-- [x] Added a read-only dashboard review table for candidate sources.
-- [x] Extended `R/validate_counts.R` and tests to cover the candidate queue.
-- [x] Kept `data/outbreak_counts.csv` manually curated only.
+- [x] Added a public disclaimer banner and visible release metadata in the app.
+- [x] Reused curated-data validation at app startup and surfaced validation status in the UI.
+- [x] Reduced the default public source/news table views while keeping repository data open.
+- [x] Added a repo-tracked `VERSION` file plus `shinyapps.io` deployment and pre-deploy checklist docs.
+- [x] Added a scripted `shinyapps.io` deployment path that reads secrets from local environment variables.
 
 ## Later Milestones
 
-- [ ] Add a detected-updates tab that separates machine-discovered source candidates from human-reviewed highlights.
+- [ ] Consider Google Sheets, Airtable, or another review-friendly backend only if CSV editing becomes the bottleneck.
 - [ ] Design a curated queryable news database while keeping contextual news separate from epidemiologic counts.
-- [ ] Add shinyapps.io deployment after CI and manual validation are trusted.
-- [ ] Consider a review-friendly data entry backend after CSV workflow constraints are better understood.
+- [ ] Add richer public change-history or corrected-count views once the data model stabilizes.
+- [ ] Continue planning for independent self-hosting alongside the maintainer's R/Quarto website.
 
-## Deferred From Milestone 2
+## Deferred From Earlier Milestones
 
 - [ ] Do not automate case-count extraction yet.
 - [ ] Do not scrape PDFs for epidemiologic counts yet.

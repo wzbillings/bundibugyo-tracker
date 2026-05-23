@@ -2,6 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+.Renviron
 .superpowers/
+rsconnect/
 raw_reports/*.tmp
 raw_reports/*.partial

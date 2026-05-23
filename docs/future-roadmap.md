@@ -1,6 +1,6 @@
 # Future Roadmap
 
-This roadmap starts after milestone 4. It is intentionally directional: each milestone should still get its own scoped implementation plan before code changes begin.
+This roadmap starts after milestone 5. It is intentionally directional: each milestone should still get its own scoped implementation plan before code changes begin.
 
 ## Guiding Principles
 
@@ -10,50 +10,44 @@ This roadmap starts after milestone 4. It is intentionally directional: each mil
 - Use CI and validation as gates before public communication or deployment.
 - Make every public-facing view clearly state that counts are public reported values, not official case surveillance data.
 
-## Milestone 5 Candidate: Public Deployment Hardening And First Live Deployment
+## Milestone 6 Candidate: Review-Friendly Data Maintenance
 
-**Goal:** make the dashboard safe to host publicly, complete the first live deployment, and preserve a clean path toward later independent self-hosting without changing the manual curation model.
+**Goal:** reduce maintainer friction around the CSV workflow while preserving human review and the public read-only deployment model.
 
 Recommended scope:
 
-- Choose the first hosting target and complete the first live deployment.
-- Add deployment documentation and required environment assumptions.
-- Prefer deployment steps, configuration, and runtime assumptions that can later move off a Posit-backed server and onto independently managed infrastructure, ideally alongside the maintainer's own R/Quarto website.
+- Add review-friendly helper output such as row-validation support, a reviewer summary report, or stricter stale-data warnings.
+- Improve visibility into new candidate sources, recently promoted sources, and count rows changed since the last release.
 - Keep `data/*.csv` as repo-backed reviewed inputs.
-- Add visible public-facing release metadata: app version, latest data cutoff, latest source publication date, and validation status.
-- Add a stronger public disclaimer near the top of the app, not only in repository docs.
-- Decide whether the public app should expose source/news tables exactly as-is or with a reduced default view.
-- Add a pre-deploy checklist that requires tests and CSV validation to pass.
+- Capture lessons learned from the first public deployment without introducing hosted write-back or automation.
 
 Non-goals:
 
-- No database migration.
 - No automatic count extraction.
 - No scheduler-driven updates.
 - No write access from the hosted app back into repository data.
+- No replacement of the human candidate-promotion workflow.
 
 Acceptance criteria:
 
-- A maintainer can deploy the app from a clean checkout using documented steps.
-- The first public deployment is live and documented.
-- The hosted app makes data caveats and source provenance visible before users interpret plots.
+- A maintainer can complete a normal reviewed-data update with less friction than in milestone 5.
+- Review-focused helper output remains clearly separate from public dashboard output.
 - CI and local validation remain the source of confidence before deployment.
 
-## Milestone 6 Candidate: Review-Friendly Data Maintenance
+## Milestone 7 Candidate: Self-Hosting And Operational Portability
 
-**Goal:** reduce manual CSV editing friction while preserving human review.
+**Goal:** make the hosted deployment easier to migrate off Posit-managed infrastructure and closer to an independently managed Shiny/Quarto setup.
 
 Possible directions:
 
-- Add CSV templates or an R helper that validates a proposed row before it is appended manually.
-- Add a lightweight reviewer report showing new candidate sources, reviewed source-log rows, count rows, and validation warnings together.
-- Consider Google Sheets, Airtable, or another review-friendly input backend only if CSV editing becomes the bottleneck.
-- Add stricter validation for required text fields, source statuses, candidate promotion history, and stale data warnings.
+- Make startup, configuration, and deployment assumptions easier to reproduce on a non-Posit host.
+- Review whether the app should live alongside a Quarto website or behind a small reverse-proxy setup.
+- Add operational notes for backups, package restore, and host-level environment configuration.
 
 Non-goals:
 
-- Do not replace the manual review decision with an automated approval path.
-- Do not couple source discovery directly to epidemiologic counts.
+- Do not re-architect the data model purely for hosting convenience.
+- Do not add production automation before the manual review workflow is mature.
 
 ## Later Candidates
 
