@@ -1,5 +1,14 @@
 # NEWS
 
+## 0.2.1 - 2026-05-23
+
+Documentation cleanup and milestone 0.3 handoff.
+
+- Updated README milestone, license, and disclaimer sections.
+- Consolidated milestone 0.3 scope so the detailed implementation plan is the source of truth.
+- Rewrote the next-agent prompt as a concise handoff.
+- Added the milestone 0.3 implementation plan under `docs/superpowers/plans/`.
+
 ## 0.0.2 - 2026-05-23
 
 Milestone 0.2 replaces the milestone 0.1 sample workflow with a first reviewed public-source dataset and stronger manual curation guardrails.

@@ -9,7 +9,7 @@ Goal: make the manual workflow harder to break before adding source discovery or
 - [ ] Document CSV data-entry rules in a compact reviewer checklist.
 - [ ] Validate count `(source_url, source_name)` pairs against `data/source_log.csv`.
 - [ ] Normalize source-log duplicate URL checks before comparison.
-- [ ] Decide whether headline cards should show more than six latest rows or include a visible overflow indicator.
+- [ ] Add a visible overflow indicator when headline cards show only the first six latest strata.
 
 ## Later Milestones
 

@@ -52,6 +52,26 @@ Keep `notes` specific enough for a reviewer to find the sentence or table that s
 
 `R/validate_counts.R` checks all three manual CSVs. It verifies required columns, parseable dates, nonnegative integer counts, HTTP(S) URLs, absence of sample `example.org` URLs, allowed count types, allowed case classifications, allowed metrics, duplicate rows, duplicate source/country/classification/metric/cutoff combinations, duplicate source-log identifiers, and count URLs that are missing from `data/source_log.csv`. Negative derived increments are printed as warnings because they can reflect reclassification or deduplication and should remain reviewable.
 
-## First Milestone Scope
+## First Milestone Description
 
-The first milestone uses manual CSV entry only. Automated source discovery, scraping, GitHub Actions, deployment, and a curated queryable news database are planned for future milestones after the manual review workflow is trusted.
+The first milestone established the local-first dashboard workflow. It introduced the R Shiny app, manually edited CSV files for outbreak counts, source metadata, and contextual news highlights, and the first validation and test coverage for cleaning counts, deriving reported increments, and loading the app. The goal was to make a transparent manual review loop usable before adding automation.
+
+## Second Milestone Description
+
+The second milestone replaced development-only sample rows with reviewed public-source records from WHO, CDC, and related official or humanitarian sources. It strengthened the manual curation rules, expanded validation across all CSV inputs, preserved source-reported case classifications, made source and news tables easier to review, and hardened table rendering for data-derived display fields.
+
+## Third Milestone Scope
+
+The next milestone should focus on CI and curation guardrails before source discovery or deployment. Planned work includes adding GitHub Actions for the R test suite and CSV validation script, documenting a compact reviewer checklist for manual data entry, tightening provenance checks between `outbreak_counts.csv` and `source_log.csv`, normalizing source URL duplicate checks, and adding a visible overflow indicator when more current strata exist than the dashboard headline cards display.
+
+The third milestone should not automate case-count extraction, scrape PDFs for counts, infer zero rows for missing report days, migrate to a database, or deploy the app unless the manual validation workflow is already passing reliably.
+
+## License
+
+This code is licensed under the GNU Affero General Public License v3.0. In brief, AGPL-3.0 allows use, copying, modification, and redistribution under copyleft terms, and it includes source-sharing obligations for modified versions made available over a network. See `LICENSE.md` for the full license text.
+
+## Disclaimer
+
+Most of the code in this project was written with substantial assistance from a large language model. A human maintainer reviewed the generated code, exercised the application, and checked core functionality, but the project has not gone through the formal review, validation, or publication standards used for official WHO, CDC, Ministry of Health, or other public-health reports.
+
+This dashboard is an independent software project. It is not medical advice, public-health guidance, or a statement from the maintainer's employer. Data and derived values should be verified against the original sources before being used for analysis, communication, operational planning, or decision-making. By using or relying on this service, you acknowledge that the maintainer is not liable for decisions, actions, losses, or consequences arising from use of the app or its outputs.
