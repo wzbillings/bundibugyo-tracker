@@ -299,6 +299,16 @@ test_that("validate_source_candidates_data flags invalid review status", {
   expect_true(any(grepl("Invalid source_candidates review_status", result$errors)))
 })
 
+test_that("validate_source_candidates_data handles missing review status without error", {
+  candidate <- valid_candidate_fixture(review_status = NA, reviewed_at = "2026-05-23T09:30:00Z")
+  result <- NULL
+
+  expect_no_error({
+    result <- validate_source_candidates_data(candidate)
+  })
+  expect_true(any(grepl("Invalid source_candidates review_status", result$errors)))
+})
+
 test_that("validate_source_candidates_data flags sample and malformed urls", {
   candidates <- rbind(
     valid_candidate_fixture(candidate_id = "cand-1", url = "https://example.org/report"),
