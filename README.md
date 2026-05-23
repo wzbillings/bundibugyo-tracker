@@ -30,6 +30,8 @@ The project currently disables the `renv` sandbox in `.Rprofile` because the san
 Rscript R/validate_counts.R
 ```
 
+The same test and validation commands are also run by GitHub Actions on pull requests and pushes. CI restores packages from `renv.lock`, runs `Rscript tests/testthat.R`, and then runs `Rscript R/validate_counts.R`.
+
 6. Start the app:
 
 ```r
@@ -38,7 +40,9 @@ shiny::runApp()
 
 ## Curation Conventions
 
-Milestone 0.2 uses official/public rows entered by hand. Prefer WHO Disease Outbreak News, WHO AFRO outbreak pages, Ministry of Health statements, CDC advisories, and UN agency operational updates. Media reports may be listed in `data/news_highlights.csv` for context, but do not use them to update `data/outbreak_counts.csv` unless the underlying official count source is also reviewed.
+Use `docs/manual-reviewer-checklist.md` as the quick review checklist before changing any CSV file.
+
+Milestone 2 uses official/public rows entered by hand. Prefer WHO Disease Outbreak News, WHO AFRO outbreak pages, Ministry of Health statements, CDC advisories, and UN agency operational updates. Media reports may be listed in `data/news_highlights.csv` for context, but do not use them to update `data/outbreak_counts.csv` unless the underlying official count source is also reviewed.
 
 Use `data_cutoff_date` for the date stated by the source as the count reference date. If a single source reports different cutoff dates for different countries or classifications, enter separate rows with the cutoff date that belongs to each count.
 
@@ -50,7 +54,7 @@ Keep `notes` specific enough for a reviewer to find the sentence or table that s
 
 ## Validation Rules
 
-`R/validate_counts.R` checks all three manual CSVs. It verifies required columns, parseable dates, nonnegative integer counts, HTTP(S) URLs, absence of sample `example.org` URLs, allowed count types, allowed case classifications, allowed metrics, duplicate rows, duplicate source/country/classification/metric/cutoff combinations, duplicate source-log identifiers, and count URLs that are missing from `data/source_log.csv`. Negative derived increments are printed as warnings because they can reflect reclassification or deduplication and should remain reviewable.
+`R/validate_counts.R` checks all three manual CSVs. It verifies required columns, parseable dates, nonnegative integer counts, HTTP(S) URLs, absence of sample `example.org` URLs, allowed count types, allowed case classifications, allowed metrics, duplicate rows, duplicate source/country/classification/metric/cutoff combinations, duplicate source-log identifiers, normalized duplicate source-log URLs, and count `(source_name, source_url)` pairs that are missing from `data/source_log.csv`. Negative derived increments are printed as warnings because they can reflect reclassification or deduplication and should remain reviewable.
 
 ## First Milestone Description
 
@@ -60,11 +64,13 @@ The first milestone established the local-first dashboard workflow. It introduce
 
 The second milestone replaced development-only sample rows with reviewed public-source records from WHO, CDC, and related official or humanitarian sources. It strengthened the manual curation rules, expanded validation across all CSV inputs, preserved source-reported case classifications, made source and news tables easier to review, and hardened table rendering for data-derived display fields.
 
-## Third Milestone Scope
+## Third Milestone Description
 
-The next milestone should focus on CI and curation guardrails before source discovery or deployment. Planned work includes adding GitHub Actions for the R test suite and CSV validation script, documenting a compact reviewer checklist for manual data entry, tightening provenance checks between `outbreak_counts.csv` and `source_log.csv`, normalizing source URL duplicate checks, and adding a visible overflow indicator when more current strata exist than the dashboard headline cards display.
+The third milestone added CI and curation guardrails before source discovery or deployment. It added GitHub Actions for the R test suite and CSV validation script, documented a compact reviewer checklist for manual data entry, tightened provenance checks between `outbreak_counts.csv` and `source_log.csv`, normalized source URL duplicate checks, and added a visible overflow indicator when more current strata exist than the dashboard headline cards display. This milestone is planned as version tag `0.1.0` unless incremental fixes are needed first.
 
-The third milestone should not automate case-count extraction, scrape PDFs for counts, infer zero rows for missing report days, migrate to a database, or deploy the app unless the manual validation workflow is already passing reliably.
+## Fourth Milestone Scope
+
+The next milestone should focus on a reviewed source-discovery queue. It may identify candidate official or humanitarian source URLs and metadata for human review, but it should not automate case-count extraction, scrape PDFs for counts, infer zero rows for missing report days, migrate to a database, deploy the app, or update `data/outbreak_counts.csv` from discovered sources.
 
 ## License
 

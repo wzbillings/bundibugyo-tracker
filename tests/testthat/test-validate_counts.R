@@ -26,10 +26,13 @@ valid_counts_fixture <- function() {
   )
 }
 
-valid_source_log_fixture <- function(url = "https://www.who.int/example-report") {
+valid_source_log_fixture <- function(
+  url = "https://www.who.int/example-report",
+  source_name = "WHO"
+) {
   data.frame(
     source_id = "src-1",
-    source_name = "WHO",
+    source_name = source_name,
     title = "Report",
     url = url,
     publication_date = "2026-02-02",
@@ -134,7 +137,31 @@ test_that("validate_all_data flags count urls missing from source log", {
 
   result <- validate_all_data(counts, source_log, news)
 
-  expect_true(any(grepl("count source_url values missing from source_log", result$errors)))
+  expect_true(any(grepl("count source_name/source_url pairs missing from source_log", result$errors)))
+})
+
+test_that("validate_all_data requires count source url and source name pair in source log", {
+  result <- validate_all_data(
+    valid_counts_fixture(),
+    valid_source_log_fixture(source_name = "WHO AFRO"),
+    valid_news_fixture()
+  )
+
+  expect_true(any(grepl("count source_name/source_url pairs missing from source_log", result$errors)))
+})
+
+test_that("validate_all_data matches source provenance pairs after whitespace normalization", {
+  counts <- valid_counts_fixture()
+  counts$source_name <- "  WHO   "
+  counts$source_url <- paste0("  ", counts$source_url, "  ")
+
+  source_log <- valid_source_log_fixture()
+  source_log$source_name <- "WHO"
+  source_log$url <- paste0(source_log$url, "  ")
+
+  result <- validate_all_data(counts, source_log, valid_news_fixture())
+
+  expect_false(any(grepl("count source_name/source_url pairs missing from source_log", result$errors)))
 })
 
 test_that("validate_all_data accepts matching count urls from source log", {
@@ -144,7 +171,7 @@ test_that("validate_all_data accepts matching count urls from source log", {
     valid_news_fixture()
   )
 
-  expect_false(any(grepl("count source_url values missing from source_log", result$errors)))
+  expect_false(any(grepl("count source_name/source_url pairs missing from source_log", result$errors)))
 })
 
 test_that("validate_all_data matches count urls with surrounding whitespace", {
@@ -157,7 +184,7 @@ test_that("validate_all_data matches count urls with surrounding whitespace", {
     valid_news_fixture()
   )
 
-  expect_false(any(grepl("count source_url values missing from source_log", result$errors)))
+  expect_false(any(grepl("count source_name/source_url pairs missing from source_log", result$errors)))
 })
 
 test_that("validate_all_data ignores blank count urls in source log membership", {
@@ -171,7 +198,7 @@ test_that("validate_all_data ignores blank count urls in source log membership",
   )
 
   expect_true(any(grepl("Missing source_url", result$errors)))
-  expect_false(any(grepl("count source_url values missing from source_log", result$errors)))
+  expect_false(any(grepl("count source_name/source_url pairs missing from source_log", result$errors)))
 })
 
 test_that("validate_counts_data rejects malformed http-looking urls", {
@@ -203,6 +230,18 @@ test_that("source log and news highlight validators flag invalid fields", {
 
   expect_true(any(grepl("Invalid source_log review_status", source_result$errors)))
   expect_true(any(grepl("Invalid news_highlights category", news_result$errors)))
+})
+
+test_that("validate_source_log_data flags duplicate urls after trimming whitespace", {
+  source_log <- rbind(
+    valid_source_log_fixture(),
+    valid_source_log_fixture(url = "  https://www.who.int/example-report  ")
+  )
+  source_log$source_id <- c("src-1", "src-2")
+
+  result <- validate_source_log_data(source_log)
+
+  expect_true(any(grepl("Duplicate source_log url values", result$errors)))
 })
 
 test_that("source log and news highlight validators flag missing required dates", {

@@ -23,6 +23,7 @@ news_highlights <- read_news_highlights("data/news_highlights.csv")
 
 all_choice <- "All"
 count_dates <- range(counts$data_cutoff_date, na.rm = TRUE)
+max_headline_summary_cards <- 6
 
 select_choices <- function(values) {
   c(all_choice, sort(unique(as.character(values))))
@@ -107,6 +108,31 @@ headline_summary_card <- function(label, value, cutoff) {
       tags$div(class = "card-title", label),
       tags$div(class = "card-value", value),
       tags$div(class = "card-caption", paste("Cutoff", cutoff))
+    )
+  )
+}
+
+headline_overflow_text <- function(total_rows, visible_rows) {
+  hidden_rows <- total_rows - visible_rows
+  if (hidden_rows <= 0) {
+    return(character())
+  }
+
+  paste0("+", hidden_rows, " more strata")
+}
+
+headline_overflow_card <- function(total_rows, visible_rows) {
+  overflow_text <- headline_overflow_text(total_rows, visible_rows)
+  if (length(overflow_text) == 0) {
+    return(NULL)
+  }
+
+  bslib::card(
+    class = "dashboard-card",
+    bslib::card_body(
+      tags$div(class = "card-title", "Additional current strata"),
+      tags$div(class = "card-value", overflow_text),
+      tags$div(class = "card-caption", "Use filters or tables to review hidden strata")
     )
   )
 }
@@ -212,13 +238,20 @@ server <- function(input, output, session) {
       return(bslib::card(bslib::card_body("No data match the current filters.")))
     }
 
-    summary_cards <- lapply(seq_len(min(nrow(summary_rows), 6)), function(index) {
+    visible_summary_rows <- min(nrow(summary_rows), max_headline_summary_cards)
+
+    summary_cards <- lapply(seq_len(visible_summary_rows), function(index) {
       headline_summary_card(
         summary_rows$label[[index]],
         summary_rows$value[[index]],
         summary_rows$cutoff[[index]]
       )
     })
+
+    overflow_card <- headline_overflow_card(nrow(summary_rows), visible_summary_rows)
+    if (!is.null(overflow_card)) {
+      summary_cards <- c(summary_cards, list(overflow_card))
+    }
 
     do.call(
       bslib::layout_columns,

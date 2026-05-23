@@ -70,6 +70,18 @@ is_missing_value <- function(values) {
   is.na(values) | is.na(trimmed) | trimmed == ""
 }
 
+normalize_url_value <- function(values) {
+  trimws(as.character(values))
+}
+
+normalize_text_value <- function(values) {
+  gsub("[[:space:]]+", " ", trimws(as.character(values)))
+}
+
+source_reference_key <- function(source_name, source_url) {
+  paste(normalize_text_value(source_name), normalize_url_value(source_url), sep = "\r")
+}
+
 validate_counts_data <- function(data) {
   errors <- character()
   warnings <- character()
@@ -251,7 +263,9 @@ validate_source_log_data <- function(data) {
   if (any(duplicated(data$source_id))) {
     errors <- add_message(errors, "Duplicate source_log source_id values")
   }
-  if (any(duplicated(data$url))) {
+  normalized_urls <- normalize_url_value(data$url)
+  normalized_urls <- normalized_urls[!is.na(normalized_urls) & normalized_urls != ""]
+  if (any(duplicated(normalized_urls))) {
     errors <- add_message(errors, "Duplicate source_log url values")
   }
 
@@ -311,14 +325,33 @@ validate_all_data <- function(counts, source_log, news_highlights) {
     validate_news_highlights_data(news_highlights)
   ))
 
-  if (all(c("source_url") %in% names(counts)) && "url" %in% names(source_log)) {
-    count_urls <- trimws(as.character(counts$source_url))
-    source_urls <- trimws(as.character(source_log$url))
-    count_urls <- unique(count_urls[!is.na(count_urls) & count_urls != ""])
-    source_urls <- unique(source_urls[!is.na(source_urls) & source_urls != ""])
-    missing_count_urls <- setdiff(count_urls, source_urls)
-    if (length(missing_count_urls) > 0) {
-      result$errors <- add_message(result$errors, "count source_url values missing from source_log")
+  if (all(c("source_name", "source_url") %in% names(counts)) && all(c("source_name", "url") %in% names(source_log))) {
+    count_source_names <- normalize_text_value(counts$source_name)
+    count_urls <- normalize_url_value(counts$source_url)
+    source_log_names <- normalize_text_value(source_log$source_name)
+    source_log_urls <- normalize_url_value(source_log$url)
+
+    valid_count_pairs <- !is.na(count_source_names) &
+      count_source_names != "" &
+      !is.na(count_urls) &
+      count_urls != ""
+    valid_source_pairs <- !is.na(source_log_names) &
+      source_log_names != "" &
+      !is.na(source_log_urls) &
+      source_log_urls != ""
+
+    count_keys <- unique(source_reference_key(
+      count_source_names[valid_count_pairs],
+      count_urls[valid_count_pairs]
+    ))
+    source_keys <- unique(source_reference_key(
+      source_log_names[valid_source_pairs],
+      source_log_urls[valid_source_pairs]
+    ))
+
+    missing_count_pairs <- setdiff(count_keys, source_keys)
+    if (length(missing_count_pairs) > 0) {
+      result$errors <- add_message(result$errors, "count source_name/source_url pairs missing from source_log")
     }
   }
 

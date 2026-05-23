@@ -1,4 +1,4 @@
-# Ebola Dashboard Milestone 0.3 Implementation Plan
+# Ebola Dashboard Milestone 3 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -12,7 +12,7 @@
 
 ## Scope Summary
 
-Milestone 0.3 is a stabilization gate before source discovery. The milestone should prove that tests and CSV validation can run in CI, count rows map back to the exact reviewed source identity, source-log duplicate URL checks are whitespace-normalized, and headline cards visibly indicate when more current strata exist than the dashboard displays.
+Milestone 3 is a stabilization gate before source discovery. The milestone should prove that tests and CSV validation can run in CI, count rows map back to the exact reviewed source identity, source-log duplicate URL checks are whitespace-normalized, and headline cards visibly indicate when more current strata exist than the dashboard displays. Milestone 3 is planned as version tag `0.1.0` unless incremental fixes are needed first.
 
 Do not automate case-count extraction, scrape PDFs, infer zero rows, deploy the app, migrate to a database, or add source discovery in this milestone.
 
@@ -25,8 +25,8 @@ Do not automate case-count extraction, scrape PDFs, infer zero rows, deploy the 
 - Modify `app.R`: add a named headline-card limit and an overflow card when more current strata exist.
 - Modify `tests/testthat/test-app-loads.R`: add tests for headline overflow helper behavior.
 - Modify `README.md`: link the reviewer checklist and document CI commands.
-- Modify `NEWS.md`: add a 0.0.3 section after implementation.
-- Modify `TODO.md`: mark milestone 0.3 work complete and keep later milestones deferred.
+- Modify `NEWS.md`: add a 0.1.0 section after implementation.
+- Modify `TODO.md`: mark milestone 3 work complete and keep later milestones deferred.
 
 ## Task 1: Add GitHub Actions CI
 
@@ -88,7 +88,7 @@ jobs:
 
 Notes for the implementing agent:
 - `r-lib/actions` documents `setup-r@v2` and `setup-renv@v2` as the maintained R/renv pattern.
-- Do not add `renv::status()` as a failing CI step in this milestone because `docs/next-milestone-prompt.md` documents known R runtime / lockfile drift from milestone 0.2.
+- Do not add `renv::status()` as a failing CI step in this milestone because `docs/next-milestone-prompt.md` documents known R runtime / lockfile drift from milestone 2.
 
 - [ ] **Step 3: Document CI in the README**
 
@@ -161,7 +161,7 @@ Use this checklist before editing `data/outbreak_counts.csv`, `data/source_log.c
 
 - [ ] **Step 2: Link the checklist from README**
 
-In `README.md`, under **Curation Conventions**, add this paragraph before the existing milestone 0.2 paragraph:
+In `README.md`, under **Curation Conventions**, add this paragraph before the existing milestone 2 paragraph:
 
 ```markdown
 Use `docs/manual-reviewer-checklist.md` as the quick review checklist before changing any CSV file.
@@ -552,12 +552,12 @@ In `README.md`, update **Validation Rules** so it mentions normalized source-nam
 
 - [ ] **Step 2: Update NEWS**
 
-Add this section above `## 0.0.2 - 2026-05-23` in `NEWS.md`:
+Add this section above `## 0.0.3 - 2026-05-23` in `NEWS.md`:
 
 ```markdown
-## 0.0.3 - 2026-05-23
+## 0.1.0 - 2026-05-23
 
-Milestone 0.3 adds CI and stricter manual curation guardrails before any source discovery or deployment work.
+Milestone 3 adds CI and stricter manual curation guardrails before any source discovery or deployment work.
 
 ### CI
 
@@ -580,7 +580,7 @@ Milestone 0.3 adds CI and stricter manual curation guardrails before any source 
 Replace the active milestone section in `TODO.md` with:
 
 ```markdown
-## Next Milestone Candidate: 0.4 - Reviewed Source Discovery Queue
+## Next Milestone Candidate: Milestone 4 - Reviewed Source Discovery Queue
 
 Goal: discover candidate official or humanitarian source updates without writing epidemiologic counts automatically.
 
@@ -594,7 +594,7 @@ Keep the existing later milestone and deferred boundaries, adjusting duplicates 
 
 - [ ] **Step 4: Update next prompt**
 
-Revise `docs/next-milestone-prompt.md` so it describes the completed 0.3 state and points the next agent toward 0.4 source discovery only after CI passes.
+Revise `docs/next-milestone-prompt.md` so it describes the completed milestone 3 state and points the next agent toward milestone 4 source discovery only after CI passes.
 
 - [ ] **Step 5: Commit documentation**
 
@@ -602,7 +602,7 @@ Run:
 
 ```powershell
 git add README.md NEWS.md TODO.md docs/next-milestone-scope.md docs/next-milestone-prompt.md
-git commit -m "docs: record milestone 0.3 guardrails"
+git commit -m "docs: record milestone 3 guardrails"
 ```
 
 Expected: commit succeeds.

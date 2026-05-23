@@ -1,14 +1,16 @@
 # Next Milestone Scoping Notes
 
-## Recommended Milestone 0.3
+## Completed Milestone 3
 
 **Theme:** CI and curation guardrails.
 
-Milestone 0.3 should make the manual CSV workflow harder to break before any source discovery, scraping, deployment, or database work begins. The project direction remains a transparent Ebola outbreak monitoring dashboard that can eventually support source discovery, a review queue, and deployment, but automation should first discover candidate sources for human review rather than write epidemiologic counts.
+Milestone 3 makes the manual CSV workflow harder to break before any source discovery, scraping, deployment, or database work begins. The project direction remains a transparent Ebola outbreak monitoring dashboard that can eventually support source discovery, a review queue, and deployment, but automation should first discover candidate sources for human review rather than write epidemiologic counts.
 
 ## Scope
 
-Milestone 0.3 is the stabilization gate after milestone 0.2's reviewed public-source seed data. It should add CI for tests and CSV validation, add a manual reviewer checklist, tighten source provenance validation to exact reviewed source identity, normalize source-log URL duplicate checks, and add a visible dashboard signal when headline cards hide additional current strata.
+Milestone 3 is the stabilization gate after milestone 2's reviewed public-source seed data. It adds CI for tests and CSV validation, adds a manual reviewer checklist, tightens source provenance validation to exact reviewed source identity, normalizes source-log URL duplicate checks, and adds a visible dashboard signal when headline cards hide additional current strata.
+
+Milestone 3 is planned as version tag `0.1.0` unless incremental fixes are needed first.
 
 The detailed implementation source of truth is `docs/superpowers/plans/2026-05-23-ebola-dashboard-milestone-0-3.md`.
 
@@ -31,6 +33,6 @@ The detailed implementation source of truth is `docs/superpowers/plans/2026-05-2
 - Headline cards visibly indicate when more current strata exist than are displayed.
 - Local tests and curated CSV validation pass.
 
-## Recommended Milestone 0.4
+## Recommended Milestone 4
 
-After 0.3, consider a reviewed source-discovery queue. It should identify candidate official or humanitarian source URLs and metadata for human review only. It should not update `outbreak_counts.csv`, extract case counts, or mark discovered sources as reviewed without a human step.
+After milestone 3, consider a reviewed source-discovery queue. It should identify candidate official or humanitarian source URLs and metadata for human review only. It should not update `outbreak_counts.csv`, extract case counts, or mark discovered sources as reviewed without a human step.

@@ -72,6 +72,18 @@ test_that("latest_summary_rows includes classified death rows", {
   expect_true(any(death_rows$case_classification %in% c("suspected", "confirmed")))
 })
 
+test_that("headline overflow text reports hidden current strata", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  expect_equal(env$headline_overflow_text(8, 6), "+2 more strata")
+  expect_equal(env$headline_overflow_text(6, 6), character())
+})
+
 test_that("headline cards render without nested layout warning", {
   old_wd <- getwd()
   on.exit(setwd(old_wd), add = TRUE)
@@ -91,4 +103,18 @@ test_that("headline cards render without nested layout warning", {
 
     expect_warning(output$headline_cards, NA)
   })
+})
+
+test_that("headline overflow card renders visible hidden-strata indicator", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  overflow_card <- env$headline_overflow_card(8, 6)
+
+  expect_match(as.character(overflow_card), "+2 more strata", fixed = TRUE)
+  expect_match(as.character(overflow_card), "Additional current strata", fixed = TRUE)
 })
