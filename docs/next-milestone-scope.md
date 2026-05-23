@@ -1,66 +1,64 @@
 # Next Milestone Scoping Notes
 
-## Completed Milestone 3
-
-**Theme:** CI and curation guardrails.
-
-Milestone 3 made the manual CSV workflow harder to break before any source discovery, scraping, deployment, or database work. It added CI for tests and CSV validation, added a manual reviewer checklist, tightened source provenance validation to exact reviewed source identity, normalized source-log URL duplicate checks, and added a visible dashboard signal when headline cards hide additional current strata.
-
-Milestone 3 is planned as version tag `0.1.0` unless incremental fixes are needed first. The detailed implementation source of truth was `docs/superpowers/plans/2026-05-23-ebola-dashboard-milestone-0-3.md`.
-
-## Recommended Milestone 4
+## Completed Milestone 4
 
 **Theme:** Reviewed source discovery queue.
 
-Milestone 4 should identify candidate official or humanitarian source updates for human review without writing epidemiologic counts automatically. The work should create a clear separation between machine-discovered candidates, human-reviewed source-log entries, contextual news highlights, and manually curated epidemiologic counts.
+Milestone 4 added a CSV-backed candidate-source review queue before any deployment or automated discovery pipeline. It introduced `data/source_candidates.csv`, extended validation to candidate-source metadata and review-state rules, added lightweight tests for the new queue behavior, and exposed a read-only candidate review table in the dashboard without changing the manual curation model for reviewed sources or outbreak counts.
+
+Milestone 4 is prepared for merge as version tag `0.2.0`. The implementation source of truth for the release is the current app, tests, and queue workflow documentation in this repository.
+
+## Recommended Milestone 5
+
+**Theme:** Public deployment hardening.
+
+Milestone 5 should make the dashboard safe to host publicly without changing the repo-backed manual curation model. The work should focus on deployment readiness, public-facing caveats, visible release metadata, and a stronger public review checklist before the app is exposed to non-maintainer visitors.
 
 ## Current State
 
 - Manual CSV files in `data/` remain the source of truth.
-- `data/source_log.csv` contains reviewed source metadata.
-- `data/outbreak_counts.csv` contains manually curated epidemiologic count rows.
-- `data/news_highlights.csv` contains contextual headlines that do not drive counts.
+- `data/source_candidates.csv` stores unreviewed or review-tracked candidate source metadata only.
+- `data/source_log.csv` stores reviewed source metadata only.
+- `data/outbreak_counts.csv` stores manually curated epidemiologic count rows only.
+- `data/news_highlights.csv` stores contextual headlines that do not drive counts.
 - CI runs `Rscript tests/testthat.R` and `Rscript R/validate_counts.R`.
 - Count rows must match reviewed source-log entries by normalized `(source_name, source_url)` pair.
+- The dashboard candidate queue is read-only and cannot update queue state.
 
-## In Scope For Milestone 4
+## In Scope For Milestone 5
 
-- Add a candidate-source queue or staging file for discovered source metadata.
-- Keep discovered candidates separate from reviewed `data/source_log.csv` rows until a human reviewer promotes them.
-- Prefer official and humanitarian sources such as WHO Disease Outbreak News, WHO AFRO pages, Ministry of Health statements, CDC advisories, UN agency updates, and ReliefWeb pages that link to official or humanitarian source material.
-- Add validation for the candidate queue if a new CSV is introduced.
-- Add lightweight tests for candidate parsing, validation, and any dashboard/report view added in this milestone.
-- Add documentation for the candidate review workflow and promotion rules.
+- Choose the first hosting target, likely shinyapps.io or Posit Connect.
+- Add deployment documentation and required environment assumptions.
+- Add visible public-facing metadata in the app, such as app version, latest data cutoff, latest source publication date, and validation status.
+- Add a stronger public disclaimer near the top of the app, not only in repository docs.
+- Decide whether public source and news tables should appear exactly as they do now or with a reduced default view.
+- Add a pre-deploy checklist that requires tests and CSV validation to pass.
 
-## Non-Goals For Milestone 4
+## Non-Goals For Milestone 5
 
-- No automated case-count extraction.
-- No PDF or webpage scraping into `data/outbreak_counts.csv`.
-- No inferred zero rows for missing report days.
-- No automatic promotion from discovered candidate to reviewed source-log entry.
-- No use of media reports to update epidemiologic counts unless the underlying official count source is reviewed by a human.
 - No database migration.
-- No deployment unless explicitly rescoped later.
-- No hard `renv::status()` CI gate unless R runtime and lockfile expectations have been intentionally reconciled.
+- No automatic case-count extraction.
+- No scheduler-driven updates.
+- No write access from the hosted app back into repository data.
+- No change to the reviewed-source promotion workflow established in milestone 4.
 
 ## Likely Implementation Shape
 
-Prefer a small, reviewable CSV-backed workflow for milestone 4. A likely first pass is `data/source_candidates.csv` plus one focused R module for candidate validation or normalization, tests under `tests/testthat/`, and a compact dashboard or report view only if it remains lightweight. Do not add a scheduler, background job, database, or count extraction pipeline in this milestone.
+Prefer a small deployment-hardening pass that keeps the existing Shiny app and CSV-backed workflow intact. A likely first pass is updated deployment docs, a small amount of top-of-app metadata and disclaimer UI, and a release checklist that treats CI and local validation as deployment gates.
 
 ## Acceptance Criteria
 
-- Candidate sources can be recorded without changing reviewed source-log rows or epidemiologic counts.
-- Candidate rows have enough metadata for a human reviewer to decide whether to promote, reject, or defer the source.
-- Any new candidate CSV is validated by local tests and, if appropriate, by `R/validate_counts.R` or a clearly documented companion validator.
-- Documentation explains the human review path from candidate to reviewed source-log entry.
+- A maintainer can deploy the app from a clean checkout using documented steps.
+- The hosted app makes data caveats and source provenance visible before users interpret plots.
+- CI and local validation remain the source of confidence before deployment.
 - `Rscript tests/testthat.R` passes.
 - `Rscript R/validate_counts.R` passes.
 - `.github/workflows/validate.yml` remains parseable locally.
 
 ## Human Decisions Before Implementation
 
-See `docs/milestone-4-human-in-loop-tasks.md` for the maintainer checklist to complete before assigning milestone 4.
+See `docs/milestone-5-human-in-loop-tasks.md` for the current maintainer checklist to complete before assigning milestone 5.
 
-## Roadmap After Milestone 4
+## Roadmap After Milestone 5
 
-Milestone 4 should not absorb public hosting or broader data maintenance work. Future milestone candidates are tracked in `docs/future-roadmap.md`, with milestone 5 currently framed as public deployment hardening once the reviewed source-discovery queue is stable.
+Future milestone candidates are tracked in `docs/future-roadmap.md`, with milestone 6 currently framed as review-friendly data maintenance after public deployment is stable.

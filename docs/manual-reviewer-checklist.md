@@ -1,12 +1,21 @@
 # Manual Reviewer Checklist
 
-Use this checklist before editing `data/outbreak_counts.csv`, `data/source_log.csv`, or `data/news_highlights.csv`.
+Use this checklist before editing `data/source_candidates.csv`, `data/outbreak_counts.csv`, `data/source_log.csv`, or `data/news_highlights.csv`.
 
 ## Source Eligibility
 
 - Prefer WHO Disease Outbreak News, WHO AFRO outbreak pages, Ministry of Health statements, CDC advisories, and UN agency operational updates.
 - Treat media reports as contextual news only unless the article links to an official count source that you also review.
 - Do not use automatically discovered sources until a human has reviewed them.
+
+## Candidate Queue Entry
+
+- Add newly discovered source metadata to `data/source_candidates.csv` first.
+- Keep candidate rows separate from reviewed `data/source_log.csv` rows until a human reviewer promotes the source manually.
+- Use `review_status` values `queued`, `reviewed`, `promoted`, `rejected`, or `deferred`.
+- Add `reviewed_at` when a candidate leaves `queued`.
+- Set `promoted_source_id` only after the promoted source row has been added manually to `data/source_log.csv`.
+- Do not use the dashboard to edit queue state; the candidate queue is read-only in the app.
 
 ## Source Log Entry
 

@@ -1,5 +1,32 @@
 # NEWS
 
+## 0.2.0 - 2026-05-23
+
+Milestone 4 adds a reviewed source-discovery queue while keeping reviewed sources and epidemiologic counts manually curated.
+
+### Candidate Queue
+
+- Added `data/source_candidates.csv` as a separate queue for unreviewed or review-tracked candidate source metadata.
+- Kept candidate rows separate from reviewed `data/source_log.csv` entries until a human promotes them manually.
+- Recorded candidate review state with explicit queue statuses and promotion history fields.
+
+### Validation
+
+- Extended `R/validate_counts.R` to validate candidate queue columns, timestamps, URL quality, duplicate identifiers, normalized duplicate URLs, and review-state rules.
+- Kept the reviewed count provenance guardrails unchanged, including normalized `(source_name, source_url)` matching against `data/source_log.csv`.
+- Added regression tests for candidate queue validation and dashboard loading.
+
+### Dashboard
+
+- Added a read-only `Candidate Source Queue` table to the dashboard for reviewer context.
+- Kept queue edits out of the Shiny UI so random app visitors cannot update review state.
+- Preserved existing headline cards, plots, source log, and news views.
+
+### Documentation
+
+- Updated README workflow guidance for the reviewed source-discovery queue and the planned `0.2.0` merge-tag release.
+- Prepared milestone 5 scope notes, human-in-the-loop checklist, and next-agent handoff prompt for public deployment hardening.
+
 ## 0.1.0 - 2026-05-23
 
 Milestone 3 adds CI and stricter manual curation guardrails before any source discovery or deployment work.

@@ -49,6 +49,23 @@ required_news_columns <- c(
   "notes"
 )
 
+required_candidate_columns <- c(
+  "candidate_id",
+  "discovered_at",
+  "source_name",
+  "title",
+  "url",
+  "publication_date",
+  "source_type",
+  "country",
+  "keywords",
+  "discovery_method",
+  "review_status",
+  "review_notes",
+  "reviewed_at",
+  "promoted_source_id"
+)
+
 assert_required_columns <- function(data, required_columns) {
   missing_columns <- setdiff(required_columns, names(data))
 
@@ -138,4 +155,30 @@ clean_news_highlights <- function(data) {
 
 read_news_highlights <- function(path = "data/news_highlights.csv") {
   clean_news_highlights(read_csv(path, show_col_types = FALSE))
+}
+
+clean_source_candidates <- function(data) {
+  assert_required_columns(data, required_candidate_columns)
+
+  data %>%
+    mutate(
+      candidate_id = str_squish(candidate_id),
+      discovered_at = ymd_hms(discovered_at),
+      source_name = str_squish(source_name),
+      title = str_squish(title),
+      url = str_squish(url),
+      publication_date = ymd(publication_date),
+      source_type = str_to_lower(str_squish(source_type)),
+      country = standardize_country(country),
+      keywords = str_squish(keywords),
+      discovery_method = str_to_lower(str_squish(discovery_method)),
+      review_status = str_to_lower(str_squish(review_status)),
+      review_notes = str_squish(review_notes),
+      reviewed_at = ymd_hms(reviewed_at),
+      promoted_source_id = str_squish(promoted_source_id)
+    )
+}
+
+read_source_candidates <- function(path = "data/source_candidates.csv") {
+  clean_source_candidates(read_csv(path, show_col_types = FALSE))
 }

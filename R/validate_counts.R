@@ -311,6 +311,118 @@ validate_news_highlights_data <- function(data) {
   list(errors = errors, warnings = character())
 }
 
+validate_source_candidates_data <- function(data) {
+  errors <- character()
+
+  required_columns <- if (exists("required_candidate_columns")) {
+    required_candidate_columns
+  } else {
+    c(
+      "candidate_id",
+      "discovered_at",
+      "source_name",
+      "title",
+      "url",
+      "publication_date",
+      "source_type",
+      "country",
+      "keywords",
+      "discovery_method",
+      "review_status",
+      "review_notes",
+      "reviewed_at",
+      "promoted_source_id"
+    )
+  }
+
+  missing_columns <- setdiff(required_columns, names(data))
+  if (length(missing_columns) > 0) {
+    errors <- add_message(
+      errors,
+      paste(
+        "Missing required source_candidates columns:",
+        paste(missing_columns, collapse = ", ")
+      )
+    )
+    return(list(errors = errors, warnings = character()))
+  }
+
+  candidate_ids <- normalize_text_value(data$candidate_id)
+  missing_candidate_ids <- is.na(candidate_ids) | candidate_ids == ""
+  if (any(missing_candidate_ids)) {
+    errors <- add_message(errors, "Missing source_candidates candidate_id values")
+  }
+  if (any(duplicated(candidate_ids[!missing_candidate_ids]))) {
+    errors <- add_message(errors, "Duplicate source_candidates candidate_id values")
+  }
+
+  errors <- c(errors, validate_url_values(data$url, "source_candidates url"))
+
+  discovered_at <- suppressWarnings(lubridate::ymd_hms(data$discovered_at))
+  publication_dates <- suppressWarnings(lubridate::ymd(data$publication_date))
+  reviewed_at <- suppressWarnings(lubridate::ymd_hms(data$reviewed_at))
+
+  missing_discovered_at <- is_missing_value(data$discovered_at)
+  missing_publication_dates <- is_missing_value(data$publication_date)
+  missing_reviewed_at <- is_missing_value(data$reviewed_at)
+
+  if (any(missing_discovered_at)) {
+    errors <- add_message(errors, "Missing source_candidates discovered_at values")
+  }
+  if (any(is.na(discovered_at) & !missing_discovered_at)) {
+    errors <- add_message(errors, "Invalid source_candidates discovered_at values")
+  }
+  if (any(is.na(publication_dates) & !missing_publication_dates)) {
+    errors <- add_message(errors, "Invalid source_candidates publication_date values")
+  }
+  if (any(is.na(reviewed_at) & !missing_reviewed_at)) {
+    errors <- add_message(errors, "Invalid source_candidates reviewed_at values")
+  }
+
+  review_status <- tolower(trimws(data$review_status))
+  valid_statuses <- c("queued", "reviewed", "promoted", "rejected", "deferred")
+  if (any(is.na(review_status) | !(review_status %in% valid_statuses))) {
+    errors <- add_message(errors, "Invalid source_candidates review_status values")
+  }
+
+  normalized_urls <- normalize_url_value(data$url)
+  normalized_urls <- normalized_urls[!is.na(normalized_urls) & normalized_urls != ""]
+  if (any(duplicated(normalized_urls))) {
+    errors <- add_message(errors, "Duplicate source_candidates url values")
+  }
+
+  promoted_source_id <- normalize_text_value(data$promoted_source_id)
+  promoted_source_id_missing <- is.na(promoted_source_id) | promoted_source_id == ""
+
+  reviewed_rows <- !is.na(review_status) & review_status %in% c("reviewed", "rejected", "deferred")
+  if (any(reviewed_rows & missing_reviewed_at, na.rm = TRUE)) {
+    errors <- add_message(
+      errors,
+      "Reviewed, rejected, and deferred candidates require reviewed_at"
+    )
+  }
+
+  promoted_rows <- !is.na(review_status) & review_status == "promoted"
+  if (any(promoted_rows & missing_reviewed_at, na.rm = TRUE)) {
+    errors <- add_message(errors, "Promoted candidates require reviewed_at")
+  }
+  if (any(promoted_rows & promoted_source_id_missing, na.rm = TRUE)) {
+    errors <- add_message(errors, "Promoted candidates require promoted_source_id")
+  }
+
+  non_promoted_rows <- !is.na(review_status) & review_status != "promoted"
+  if (any(non_promoted_rows & !promoted_source_id_missing, na.rm = TRUE)) {
+    errors <- add_message(errors, "Only promoted candidates may set promoted_source_id")
+  }
+
+  queued_rows <- !is.na(review_status) & review_status == "queued"
+  if (any(queued_rows & !missing_reviewed_at, na.rm = TRUE)) {
+    errors <- add_message(errors, "Queued candidates must leave reviewed_at blank")
+  }
+
+  list(errors = errors, warnings = character())
+}
+
 combine_validation_results <- function(results) {
   list(
     errors = unlist(lapply(results, `[[`, "errors"), use.names = FALSE),
@@ -318,12 +430,17 @@ combine_validation_results <- function(results) {
   )
 }
 
-validate_all_data <- function(counts, source_log, news_highlights) {
-  result <- combine_validation_results(list(
+validate_all_data <- function(counts, source_log, news_highlights, source_candidates = NULL) {
+  results <- list(
     validate_counts_data(counts),
     validate_source_log_data(source_log),
     validate_news_highlights_data(news_highlights)
-  ))
+  )
+  if (!is.null(source_candidates)) {
+    results <- c(results, list(validate_source_candidates_data(source_candidates)))
+  }
+
+  result <- combine_validation_results(results)
 
   if (all(c("source_name", "source_url") %in% names(counts)) && all(c("source_name", "url") %in% names(source_log))) {
     count_source_names <- normalize_text_value(counts$source_name)
@@ -368,13 +485,15 @@ validate_all_data <- function(counts, source_log, news_highlights) {
 run_validation <- function(
   counts_path = "data/outbreak_counts.csv",
   source_log_path = "data/source_log.csv",
-  news_highlights_path = "data/news_highlights.csv"
+  news_highlights_path = "data/news_highlights.csv",
+  source_candidates_path = "data/source_candidates.csv"
 ) {
   counts <- readr::read_csv(counts_path, show_col_types = FALSE)
   source_log <- readr::read_csv(source_log_path, show_col_types = FALSE)
   news_highlights <- readr::read_csv(news_highlights_path, show_col_types = FALSE)
+  source_candidates <- readr::read_csv(source_candidates_path, show_col_types = FALSE)
 
-  result <- validate_all_data(counts, source_log, news_highlights)
+  result <- validate_all_data(counts, source_log, news_highlights, source_candidates)
 
   for (warning in result$warnings) {
     message("WARNING: ", warning)
