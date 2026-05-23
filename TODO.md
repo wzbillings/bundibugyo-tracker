@@ -10,6 +10,7 @@ Goal: make the dashboard safe to host publicly without changing the manual curat
 - [ ] Add a stronger public disclaimer near the top of the app.
 - [ ] Decide whether public source/news tables should use the current full view or a reduced default view.
 - [ ] Add a pre-deploy checklist that requires tests and CSV validation to pass.
+- [ ] Use `docs/milestone-5-human-in-loop-tasks.md` to confirm maintainer decisions before implementation.
 
 ## Completed Milestone 4
 
@@ -21,7 +22,6 @@ Goal: make the dashboard safe to host publicly without changing the manual curat
 
 ## Later Milestones
 
-- [ ] Plan milestone 5 public deployment hardening from `docs/future-roadmap.md`.
 - [ ] Add a detected-updates tab that separates machine-discovered source candidates from human-reviewed highlights.
 - [ ] Design a curated queryable news database while keeping contextual news separate from epidemiologic counts.
 - [ ] Add shinyapps.io deployment after CI and manual validation are trusted.

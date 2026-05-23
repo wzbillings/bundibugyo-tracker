@@ -13,7 +13,7 @@ Read first:
 3. `TODO.md`
 4. `docs/next-milestone-scope.md`
 5. `docs/manual-reviewer-checklist.md`
-6. `docs/milestone-4-human-in-loop-tasks.md`
+6. `docs/milestone-5-human-in-loop-tasks.md`
 7. `docs/future-roadmap.md`
 8. `R/validate_counts.R`
 9. `tests/testthat/test-validate_counts.R`
@@ -29,7 +29,7 @@ Current state:
 - Count rows must match reviewed source-log entries by normalized `(source_name, source_url)` pair.
 - The dashboard uses dynamic headline cards, Plotly plots, DT tables, filters, caveats, a headline overflow indicator, and a read-only candidate queue table.
 - Queue edits are repository-managed only; random app visitors cannot update the review queue from the app.
-- Milestone 4 is planned as version tag `0.2.0` unless incremental fixes are needed first.
+- Milestone 4 is prepared for merge as version tag `0.2.0`.
 
 Constraints:
 - Keep epidemiologic data manually curated.
@@ -40,6 +40,7 @@ Constraints:
 - Preserve negative increments as reviewable reporting artifacts.
 - Do not make `renv::status()` a hard CI gate unless the R runtime and lockfile expectations have been intentionally reconciled.
 - Keep the milestone 4 candidate-source promotion workflow intact while hardening for public hosting.
+- If human decisions in `docs/milestone-5-human-in-loop-tasks.md` are still unresolved, make conservative assumptions in the implementation plan and document them before editing code.
 
 Required verification before calling milestone 5 complete:
 1. `Rscript tests/testthat.R`

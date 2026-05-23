@@ -22,6 +22,11 @@ Milestone 4 adds a reviewed source-discovery queue while keeping reviewed source
 - Kept queue edits out of the Shiny UI so random app visitors cannot update review state.
 - Preserved existing headline cards, plots, source log, and news views.
 
+### Documentation
+
+- Updated README workflow guidance for the reviewed source-discovery queue and the planned `0.2.0` merge-tag release.
+- Prepared milestone 5 scope notes, human-in-the-loop checklist, and next-agent handoff prompt for public deployment hardening.
+
 ## 0.1.0 - 2026-05-23
 
 Milestone 3 adds CI and stricter manual curation guardrails before any source discovery or deployment work.

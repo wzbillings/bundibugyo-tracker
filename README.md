@@ -71,9 +71,13 @@ The second milestone replaced development-only sample rows with reviewed public-
 
 The third milestone added CI and curation guardrails before source discovery or deployment. It added GitHub Actions for the R test suite and CSV validation script, documented a compact reviewer checklist for manual data entry, tightened provenance checks between `outbreak_counts.csv` and `source_log.csv`, normalized source URL duplicate checks, and added a visible overflow indicator when more current strata exist than the dashboard headline cards display. This milestone is planned as version tag `0.1.0` unless incremental fixes are needed first.
 
-## Fourth Milestone Scope
+## Fourth Milestone Description
 
-The fourth milestone adds a reviewed source-discovery queue. It records candidate official or humanitarian source URLs and metadata for human review in `data/source_candidates.csv`, validates the queue alongside the existing reviewed CSVs, and exposes a read-only dashboard review table. It does not automate case-count extraction, scrape PDFs for counts, infer zero rows for missing report days, migrate to a database, deploy the app, or update `data/outbreak_counts.csv` from discovered sources.
+The fourth milestone added a reviewed source-discovery queue. It records candidate official or humanitarian source URLs and metadata for human review in `data/source_candidates.csv`, validates the queue alongside the existing reviewed CSVs, and exposes a read-only dashboard review table. It does not automate case-count extraction, scrape PDFs for counts, infer zero rows for missing report days, migrate to a database, deploy the app, or update `data/outbreak_counts.csv` from discovered sources. This milestone is planned as version tag `0.2.0` unless incremental fixes are needed first.
+
+## Fifth Milestone Candidate
+
+The next milestone should focus on public deployment hardening. It should make the dashboard safe to host publicly without changing the repo-backed manual curation model, while keeping candidate queue edits and reviewed count updates out of the hosted app itself. See `docs/next-milestone-scope.md` and `docs/milestone-5-human-in-loop-tasks.md` for the current milestone 5 handoff package.
 
 ## Future Roadmap
 

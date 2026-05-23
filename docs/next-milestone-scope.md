@@ -6,7 +6,7 @@
 
 Milestone 4 added a CSV-backed candidate-source review queue before any deployment or automated discovery pipeline. It introduced `data/source_candidates.csv`, extended validation to candidate-source metadata and review-state rules, added lightweight tests for the new queue behavior, and exposed a read-only candidate review table in the dashboard without changing the manual curation model for reviewed sources or outbreak counts.
 
-Milestone 4 is planned as version tag `0.2.0` unless incremental fixes are needed first. The implementation source of truth is the current app, tests, and queue workflow documentation in this repository.
+Milestone 4 is prepared for merge as version tag `0.2.0`. The implementation source of truth for the release is the current app, tests, and queue workflow documentation in this repository.
 
 ## Recommended Milestone 5
 
@@ -57,9 +57,7 @@ Prefer a small deployment-hardening pass that keeps the existing Shiny app and C
 
 ## Human Decisions Before Implementation
 
-- Confirm the first deployment target.
-- Confirm whether the public app should show the full source/news tables or a reduced default view.
-- Confirm any hosting-specific secret or account handling that should stay outside the repository.
+See `docs/milestone-5-human-in-loop-tasks.md` for the current maintainer checklist to complete before assigning milestone 5.
 
 ## Roadmap After Milestone 5
 
