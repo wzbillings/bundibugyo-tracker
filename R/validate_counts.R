@@ -331,10 +331,17 @@ validate_all_data <- function(counts, source_log, news_highlights) {
     source_log_names <- normalize_text_value(source_log$source_name)
     source_log_urls <- normalize_url_value(source_log$url)
 
-    valid_count_pairs <- !is.na(count_source_names) &
-      count_source_names != "" &
-      !is.na(count_urls) &
-      count_urls != ""
+    missing_count_source_name <- is.na(count_source_names) | count_source_names == ""
+    missing_count_source_url <- is.na(count_urls) | count_urls == ""
+
+    if (any(missing_count_source_name)) {
+      result$errors <- add_message(result$errors, "counts contains missing or blank source_name")
+    }
+    if (any(missing_count_source_url)) {
+      result$errors <- add_message(result$errors, "counts contains missing or blank source_url")
+    }
+
+    valid_count_pairs <- !missing_count_source_name & !missing_count_source_url
     valid_source_pairs <- !is.na(source_log_names) &
       source_log_names != "" &
       !is.na(source_log_urls) &
