@@ -394,29 +394,29 @@ validate_source_candidates_data <- function(data) {
   promoted_source_id <- normalize_text_value(data$promoted_source_id)
   promoted_source_id_missing <- is.na(promoted_source_id) | promoted_source_id == ""
 
-  reviewed_rows <- review_status %in% c("reviewed", "rejected", "deferred")
-  if (any(reviewed_rows & missing_reviewed_at)) {
+  reviewed_rows <- !is.na(review_status) & review_status %in% c("reviewed", "rejected", "deferred")
+  if (any(reviewed_rows & missing_reviewed_at, na.rm = TRUE)) {
     errors <- add_message(
       errors,
       "Reviewed, rejected, and deferred candidates require reviewed_at"
     )
   }
 
-  promoted_rows <- review_status == "promoted"
-  if (any(promoted_rows & missing_reviewed_at)) {
+  promoted_rows <- !is.na(review_status) & review_status == "promoted"
+  if (any(promoted_rows & missing_reviewed_at, na.rm = TRUE)) {
     errors <- add_message(errors, "Promoted candidates require reviewed_at")
   }
-  if (any(promoted_rows & promoted_source_id_missing)) {
+  if (any(promoted_rows & promoted_source_id_missing, na.rm = TRUE)) {
     errors <- add_message(errors, "Promoted candidates require promoted_source_id")
   }
 
   non_promoted_rows <- !is.na(review_status) & review_status != "promoted"
-  if (any(non_promoted_rows & !promoted_source_id_missing)) {
+  if (any(non_promoted_rows & !promoted_source_id_missing, na.rm = TRUE)) {
     errors <- add_message(errors, "Only promoted candidates may set promoted_source_id")
   }
 
-  queued_rows <- review_status == "queued"
-  if (any(queued_rows & !missing_reviewed_at)) {
+  queued_rows <- !is.na(review_status) & review_status == "queued"
+  if (any(queued_rows & !missing_reviewed_at, na.rm = TRUE)) {
     errors <- add_message(errors, "Queued candidates must leave reviewed_at blank")
   }
 
