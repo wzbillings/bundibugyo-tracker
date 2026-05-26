@@ -20,6 +20,122 @@ test_that("app.R exposes table link helper", {
   expect_match(env$format_link("https://example.org/report"), "<a href=")
 })
 
+test_that("app.R exposes public disclaimer helpers", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  expect_true(exists("full_disclaimer_url", envir = env))
+  expect_identical(
+    env$full_disclaimer_url,
+    "https://github.com/wzbillings/bundibugyo-tracker#disclaimer"
+  )
+  expect_true(exists("public_disclaimer_html", envir = env))
+  expect_match(
+    as.character(env$public_disclaimer_html()),
+    "Unofficial exploratory dashboard; verify all information against original and official sources before use.",
+    fixed = TRUE
+  )
+  expect_match(
+    as.character(env$public_disclaimer_html()),
+    "See the full disclaimer:",
+    fixed = TRUE
+  )
+})
+
+test_that("app.R reads the repo version file", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+  version_file <- tempfile(fileext = ".txt")
+  writeLines("9.9.9-test", version_file)
+
+  expect_true(exists("read_app_version", envir = env))
+  expect_identical(env$read_app_version(version_file), "9.9.9-test")
+})
+
+test_that("app.R derives the latest reviewed source publication date", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  source_log <- data.frame(
+    source_id = c("src-1", "src-2", "src-3"),
+    source_name = c("WHO", "CDC", "WHO AFRO"),
+    title = c("A", "B", "C"),
+    url = c(
+      "https://www.who.int/a",
+      "https://www.cdc.gov/b",
+      "https://www.afro.who.int/c"
+    ),
+    publication_date = as.Date(c("2026-05-22", "2026-05-25", "2026-05-21")),
+    retrieved_at = as.POSIXct(
+      c("2026-05-23 12:00:00", "2026-05-23 12:00:00", "2026-05-23 12:00:00"),
+      tz = "UTC"
+    ),
+    source_type = c("don", "statement", "sitrep"),
+    country = c("DRC", "Uganda", "DRC"),
+    keywords = c("a", "b", "c"),
+    review_status = c("reviewed", "rejected", "reviewed"),
+    notes = c("a", "b", "c"),
+    stringsAsFactors = FALSE
+  )
+
+  expect_true(exists("format_latest_reviewed_source_date", envir = env))
+  expect_identical(
+    env$format_latest_reviewed_source_date(source_log),
+    "2026-05-22"
+  )
+})
+
+test_that("app.R summarizes validation results for display", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  expect_true(exists("summarize_validation_status", envir = env))
+  expect_identical(
+    env$summarize_validation_status(list(errors = character(), warnings = character()))$label,
+    "Passed"
+  )
+  expect_identical(
+    env$summarize_validation_status(list(errors = character(), warnings = "warning"))$label,
+    "Passed with warnings"
+  )
+  expect_identical(
+    env$summarize_validation_status(list(errors = "error", warnings = character()))$label,
+    "Failed"
+  )
+})
+
+test_that("app.R stops startup when curated data validation returns errors", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  expect_true(exists("abort_if_validation_errors", envir = env))
+  expect_error(
+    env$abort_if_validation_errors(list(errors = "bad row", warnings = character())),
+    "Curated data validation failed",
+    fixed = TRUE
+  )
+})
+
 test_that("app.R loads source candidates for the dashboard", {
   old_wd <- getwd()
   on.exit(setwd(old_wd), add = TRUE)
@@ -114,6 +230,40 @@ test_that("candidate queue table data escapes raw text and preserves links", {
   expect_identical(table_data$title, "&lt;b&gt;candidate title&lt;/b&gt;")
   expect_identical(table_data$review_notes, "&lt;script&gt;alert(1)&lt;/script&gt;")
   expect_match(table_data$link, "<a href=", fixed = TRUE)
+})
+
+test_that("source log table data uses reduced public columns", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  expect_true(exists("source_log_table_data", envir = env))
+  table_data <- env$source_log_table_data(env$source_log)
+
+  expect_identical(
+    names(table_data),
+    c("publication_date", "source_name", "title", "country", "link")
+  )
+})
+
+test_that("news highlights table data uses reduced public columns", {
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(normalizePath(file.path(dirname(old_wd), "..")))
+
+  env <- new.env(parent = globalenv())
+  source("app.R", local = env)
+
+  expect_true(exists("news_highlights_table_data", envir = env))
+  table_data <- env$news_highlights_table_data(env$news_highlights)
+
+  expect_identical(
+    names(table_data),
+    c("date", "source", "title", "summary", "category", "is_official", "link")
+  )
 })
 
 test_that("candidate queue table data handles an empty queue", {

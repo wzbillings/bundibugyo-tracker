@@ -1,5 +1,27 @@
 # NEWS
 
+## 0.3.0 - 2026-05-23
+
+Milestone 5 hardens the dashboard for public hosting and prepares the first `shinyapps.io` release without changing the manual curation model.
+
+### Public App
+
+- Added a top-of-app public disclaimer banner that points readers to the full README disclaimer.
+- Added visible release metadata for app version, latest count cutoff date, latest reviewed source publication date, and curated-data validation status.
+- Reduced the default public source and news table views to high-signal columns while keeping the repository data open and the candidate queue read-only.
+
+### Validation And Runtime Safety
+
+- Reused `R/validate_counts.R` at app startup so curated-data validation errors block the app from serving invalid data.
+- Kept warning-only validation states visible in the app without hiding reviewable reporting artifacts such as negative derived increments.
+- Added regression tests for the new disclaimer, version loading, validation helpers, and reduced public table views.
+
+### Deployment
+
+- Added a repo-tracked `VERSION` file for public release metadata.
+- Added a `shinyapps.io` deployment script that reads account secrets from local environment variables instead of the repository.
+- Added dedicated deployment and pre-deploy checklist docs for maintainers, with portability notes for a later self-hosted migration.
+
 ## 0.2.0 - 2026-05-23
 
 Milestone 4 adds a reviewed source-discovery queue while keeping reviewed sources and epidemiologic counts manually curated.

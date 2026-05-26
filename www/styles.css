@@ -1,3 +1,7 @@
+.app-shell {
+  padding-bottom: 1rem;
+}
+
 .dashboard-card {
   min-height: 104px;
 }
@@ -20,6 +24,36 @@
   margin-top: 0.35rem;
 }
 
+.metadata-card {
+  min-height: 120px;
+}
+
+.metadata-status-passed {
+  border-top: 4px solid #2f855a;
+}
+
+.metadata-status-warning {
+  border-top: 4px solid #b7791f;
+}
+
+.metadata-status-failed {
+  border-top: 4px solid #c53030;
+}
+
+.public-disclaimer-banner {
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  border-left: 4px solid #c53030;
+  background: #fff1f0;
+  color: #7a1f1f;
+  font-size: 0.98rem;
+}
+
+.public-disclaimer-banner a {
+  color: #8c1d18;
+  font-weight: 600;
+}
+
 .caveat-panel {
   border-left: 4px solid #b7791f;
   background: #fff8e6;
@@ -33,6 +67,12 @@
   color: #5f4b17;
   font-size: 0.95rem;
   margin: 0.35rem 0 0.8rem;
+}
+
+.table-note {
+  color: #5f6f7a;
+  font-size: 0.92rem;
+  margin: 0 0 0.8rem;
 }
 
 @media (max-width: 768px) {
