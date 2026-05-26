@@ -53,9 +53,11 @@ test_that("app.R reads the repo version file", {
 
   env <- new.env(parent = globalenv())
   source("app.R", local = env)
+  version_file <- tempfile(fileext = ".txt")
+  writeLines("9.9.9-test", version_file)
 
   expect_true(exists("read_app_version", envir = env))
-  expect_identical(env$read_app_version("VERSION"), "0.3.0")
+  expect_identical(env$read_app_version(version_file), "9.9.9-test")
 })
 
 test_that("app.R derives the latest reviewed source publication date", {
